@@ -18,11 +18,14 @@ class Sprite:
         self.speed = speed
         self.posIn = posIn
         self.size = size
+        self.setter()
 
     def set_size(self):
         self.sprite = pygame.transform.scale(self.sprite, self.size)
 
     def set_pos(self):
+        self.posIn[0] -= self.width * 0.5
+        self.posIn[1] -= self.height * 0.5
         self.pos = self.posIn
 
     def set_trackers(self):
@@ -31,16 +34,31 @@ class Sprite:
         self.width = self.sprite.get_width()
         self.height = self.sprite.get_height()
 
-    def setter(self, pos):
+    def setter(self):
         if self.size != False:
             self.set_size()
         self.set_trackers()
         self.set_pos()
 
+    def movement(self, ldir, rdir, ddir, udir):
+        if ldir:
+            self.pos[0] -= self.speed
+            if self.pos[0] < 0:
+                self.pos[0] = 0
+        elif rdir: 
+            self.pos[0] += self.speed
+            if self.pos[0] > w - self.width:
+                self.pos[0] = w - self.width
+        elif ddir:
+            self.pos[1] += self.speed
+        elif udir:
+            self.pos[1] -= self.speed
 
 
 
-#Set Player Sprite
+
+
+#Set player
 # player = pygame.image.load('player.png').convert_alpha()
 # player = pygame.transform.scale(player, (60, 35))
 # player_rect = player.get_rect()
@@ -48,25 +66,29 @@ class Sprite:
 # player_width, player_height = player.get_size()
 # playerPos = [w / 2 - player_width * 0.5, 550]
 # player_speed = 2
-Player = Sprite('player.png', 2, [0, 0], [60, 35])
-Player.setter([0, 0])
 
-print("hello! --------------------")
-print(Player)
+#Set Player Sprite
+Player = Sprite('player.png', 2, [w / 2, 567], [60, 35])
 
+player_dir = False
 key_left = False
 key_right = False
-key_down = False
 key_up = False
+key_down = False
 game_loop = True
-color = (255, 255, 255)
+
 while game_loop:
-    window.fill(color)
-    pygame.draw.rect(window, (200, 0, 0), (window.get_width(), 
-        window.get_height(), window.get_width(),
-        window.get_height()))
+    window.fill((255, 255, 255))
+
+    #The below is for sizing and resizing purposes //if I get to it that is
+    pygame.draw.rect(window, (200, 0, 0), (window.get_width()/3, 
+        window.get_height()/3, window.get_width()/3,
+        window.get_height()/3))
+
+    #Show Player
     window.blit(Player.sprite, (Player.pos[0], Player.pos[1]))
-    # window.blit(player, player_rect)
+
+    #Events
     for event in pygame.event.get():
 
         if (event.type == pygame.QUIT):
@@ -90,30 +112,25 @@ while game_loop:
                 key_down = False
             elif event.key == pygame.K_UP:
                 key_up = False
-            
-        # if event.type == pygame.VIDEORESIZE:
-        #     old_window_saved = window
-        #     window = pygame.display.set_mode((event.w, event.h),
-        #         pygame.RESIZABLE)
-        #     window.blit(old_window_saved, (0, 0))
-        #     del old_window_saved
-        
-    if key_left:
-        Player.pos[0] -= Player.speed
-        if Player.pos[0] < 0:
-            Player.pos[0] = 0
-    elif key_right:
-        Player.pos[0] += Player.speed
-        if Player.pos[0] > (w - Player.width):
-            Player.pos[0] = w - Player.width
-    elif key_down:
-        Player.pos[1] += Player.speed
-        if Player.pos[1] > (h - Player.height):
-            Player.pos[1] = h - Player.height
-    elif key_up:
-        Player.pos[1] -= Player.speed
-        if Player.pos[1] < 0:
-            Player.pos[1] = 0
+
+    #Movement listener
+    Player.movement(key_left, key_right, key_down, key_up)
+    # if key_left:
+    #     Player.pos[0] -= Player.speed
+    #     if Player.pos[0] < 0:
+    #         Player.pos[0] = 0
+    # elif key_right:
+    #     Player.pos[0] += Player.speed
+    #     if Player.pos[0] > (w - Player.width):
+    #         Player.pos[0] = w - Player.width
+    # elif key_down:
+    #     Player.pos[1] += Player.speed
+    #     if Player.pos[1] > (h - Player.height):
+    #         Player.pos[1] = h - Player.height
+    # elif key_up:
+    #     Player.pos[1] -= Player.speed
+    #     if Player.pos[1] < 0:
+    #         Player.pos[1] = 0
     # if key_left:
     #     playerPos[0] -= player_speed
     #     if playerPos[0] < 0:
