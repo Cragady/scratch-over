@@ -1,18 +1,21 @@
-import pygame, sys
+import pygame, sys, random
 from pygame.locals import *
 
 pygame.init()
 
-window = pygame.display.set_mode((600, 600), pygame.RESIZABLE)
+window = pygame.display.set_mode((600, 500), pygame.RESIZABLE)
 
 pygame.display.set_caption('Cat & Mouse')
 
 #Grabbers
 w, h = pygame.display.get_surface().get_size()
+background_image = pygame.image.load('neon-tun-back.png').convert()
+background_image = pygame.transform.scale(background_image, (w, h))
 
 #Sprite Template
 class Sprite:
-    def __init__(self, image, speed, posIn, size):
+    def __init__(self, stype, image, speed, posIn, size):
+        self.stype = stype
         self.image = pygame.image.load(image).convert_alpha()
         self.sprite = self.image
         self.speed = speed
@@ -23,9 +26,17 @@ class Sprite:
     def set_size(self):
         self.sprite = pygame.transform.scale(self.sprite, self.size)
 
+
     def set_pos(self):
         self.posIn[0] -= self.width * 0.5
         self.posIn[1] -= self.height * 0.5
+        if self.stype == 'bmouse':
+            if self.posIn[0] < 0:
+                self.posIn[0] = 0
+            elif self.posIn[0] > w - self.width:
+                print('hit', w)
+                self.posIn[0] = w - self.width
+
         self.pos = self.posIn
 
     def set_trackers(self):
@@ -51,24 +62,22 @@ class Sprite:
                 self.pos[0] = w - self.width
         elif ddir:
             self.pos[1] += self.speed
+            if self.pos[1] > h:
+                self.pos[0] = random.randint(0, w)
+                self.pos[1] = h - 250
         elif udir:
             self.pos[1] -= self.speed
 
+    # def check_collision():
 
-
-
-
-#Set player
-# player = pygame.image.load('player.png').convert_alpha()
-# player = pygame.transform.scale(player, (60, 35))
-# player_rect = player.get_rect()
-# player_rect.center = window.get_rect().center
-# player_width, player_height = player.get_size()
-# playerPos = [w / 2 - player_width * 0.5, 550]
-# player_speed = 2
 
 #Set Player Sprite
-Player = Sprite('player.png', 2, [w / 2, 567], [60, 35])
+Player = Sprite('player', 'player.png', 0.5, [w / 2, h - 40], [60, 35])
+#Set Enemies
+enem_lis = []
+for i in range(9):
+    i = Sprite('bmouse', 'bmouse.png', 0.05, [random.randint(0, w), -20], [40, 65])
+    enem_lis.append(i)
 
 player_dir = False
 key_left = False
@@ -78,15 +87,17 @@ key_down = False
 game_loop = True
 
 while game_loop:
-    window.fill((255, 255, 255))
+    window.blit(background_image, [0, 0])
 
     #The below is for sizing and resizing purposes //if I get to it that is
-    pygame.draw.rect(window, (200, 0, 0), (window.get_width()/3, 
-        window.get_height()/3, window.get_width()/3,
-        window.get_height()/3))
+    # pygame.draw.rect(window, (200, 0, 0), (window.get_width()/3, 
+    #     window.get_height()/3, window.get_width()/3,
+    #     window.get_height()/3))
 
     #Show Player
     window.blit(Player.sprite, (Player.pos[0], Player.pos[1]))
+    for Eneblitz in enem_lis:
+        window.blit(Eneblitz.sprite, (Eneblitz.pos[0], Eneblitz.pos[1]))
 
     #Events
     for event in pygame.event.get():
@@ -113,10 +124,14 @@ while game_loop:
             elif event.key == pygame.K_UP:
                 key_up = False
 
-    #Movement listener
-    Player.movement(key_left, key_right, key_down, key_up)
+    #Movement listeners
+    Player.movement(key_left, key_right, False, False)
+
+    for Enemies in enem_lis:
+        Enemies.movement(False, False, True, False)
+        
 
     #Update Portions of screen
     pygame.display.update()
 
-delay = input('Press enter to finish.')
+delay = input('Press enter to finish, but if you\'re seeing this, something broke')
