@@ -115,41 +115,8 @@ while game_loop:
 
     #Movement listener
     Player.movement(key_left, key_right, key_down, key_up)
-    # if key_left:
-    #     Player.pos[0] -= Player.speed
-    #     if Player.pos[0] < 0:
-    #         Player.pos[0] = 0
-    # elif key_right:
-    #     Player.pos[0] += Player.speed
-    #     if Player.pos[0] > (w - Player.width):
-    #         Player.pos[0] = w - Player.width
-    # elif key_down:
-    #     Player.pos[1] += Player.speed
-    #     if Player.pos[1] > (h - Player.height):
-    #         Player.pos[1] = h - Player.height
-    # elif key_up:
-    #     Player.pos[1] -= Player.speed
-    #     if Player.pos[1] < 0:
-    #         Player.pos[1] = 0
-    # if key_left:
-    #     playerPos[0] -= player_speed
-    #     if playerPos[0] < 0:
-    #         playerPos[0] = 0
-    #     print(f'{w - player_width}')
-    # elif key_right:
-    #     playerPos[0] += player_speed
-    #     if playerPos[0] > (w - player_width):
-    #         playerPos[0] = w - player_width
-    # elif key_down:
-    #     playerPos[1] += player_speed
-    #     if playerPos[1] > (h - player_width):
-    #         playerPos[1] = h - player_width
-    # elif key_up:
-    #     playerPos[1] -= player_speed
-    #     if playerPos[1] < 0:
-    #         playerPos[1] = 0
 
+    #Update Portions of screen
     pygame.display.update()
-    # pygame.display.flip()
 
 delay = input('Press enter to finish.')
