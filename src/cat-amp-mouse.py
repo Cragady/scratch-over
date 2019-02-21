@@ -64,8 +64,6 @@ class Sprite:
         elif ddir:
             self.pos[1] += self.speed
             if self.pos[1] > h:
-                # self.pos[0] = random.randint(0, w)
-                # self.pos[1] = h - 250
                 self.pos = [random.randint(0, w), random.randint(-800, -20)]
         elif udir:
             self.pos[1] -= self.speed
@@ -87,15 +85,12 @@ class Sprite:
         if t1 != False:
             distance = math.sqrt(math.pow(self.ccor[0] - t1.ccor[0], 2) + math.pow(self.ccor[1] - t1.ccor[1], 2))
             if distance < 45:
-                # print('You Hit the Hitter!')
                 if(self.stype == 'enemy'):
                     self.pos = [random.randint(0, w), random.randint(-800, -20)]
-                # print(t1.pos)
 
     def set_costumes(self):
         global costumes
         new_cos = costumes[random.randint(0, 3)]
-        print(new_cos)
         self.image = pygame.image.load(new_cos['img']).convert_alpha()
         self.size = new_cos['size']
     
@@ -124,9 +119,8 @@ costumes = [
 player_dir = False
 key_left = False
 key_right = False
-key_up = False
-key_down = False
-level = 0
+key_space = False
+level = 1
 score = 0
 lives = 3
 game_loop = True
@@ -138,6 +132,30 @@ number_of_enemies = 20
 enem_lis = []
 for i in range(number_of_enemies):
     enem_lis.append(Sprite('enemy', 'bmouse.png', 0.05, [random.randint(0, w), random.randint(-800, -20)], [40, 65]))
+
+#Score Watching
+def score_watcher(sc):
+    if sc >= 20 and sc <= 29:
+        level = 2
+    elif sc >= 30 and sc <= 49:
+        level = 3
+    elif sc >= 50 and sc <= 69:
+        level = 4
+
+def pause(pauser):
+    while pauser == True:
+        for event in pygame.event.get():
+            if (event.type == pygame.QUIT):
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    pauser = False
+                elif event.key == pygame.K_RETURN:
+                    pauser = False
+                elif event.key == pygame.K_F4 and pygame.key.get_mods() & pygame.KMOD_ALT:
+                    pygame.quit()
+                    sys.exit()
 
 while game_loop:
     window.blit(background_image, [0, 0])
@@ -154,7 +172,6 @@ while game_loop:
 
     #Events
     for event in pygame.event.get():
-
         if (event.type == pygame.QUIT):
             pygame.quit()
             sys.exit()
@@ -163,24 +180,23 @@ while game_loop:
                 key_left = True
             elif event.key == pygame.K_RIGHT:
                 key_right = True
-            if event.key == pygame.K_DOWN:
-                key_down = True
-            elif event.key == pygame.K_UP:
-                key_up = True
+            elif event.key == pygame.K_SPACE:
+                key_space == True
+            elif event.key == pygame.K_RETURN:
+                pause(True)
+            elif event.key == pygame.K_ESCAPE:
+                game_loop = False
+            elif event.key == pygame.K_F4 and pygame.key.get_mods() & pygame.KMOD_ALT:
+                pygame.quit()
+                sys.exit()
         elif event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT:
                 key_left = False
             elif event.key == pygame.K_RIGHT:
                 key_right = False
-            if event.key == pygame.K_DOWN:
-                key_down = False
-            elif event.key == pygame.K_UP:
-                key_up = False
 
-    #Collision listeners
-    # for Enecolz in enem_lis:
-        # Enecolz.check_collision(Player)
-
+    #Score Listener
+    score_watcher(score)
 
     #Movement/Collision listeners
     Player.movement(key_left, key_right, False, False)
@@ -192,5 +208,3 @@ while game_loop:
 
     #Update Portions of screen
     pygame.display.update()
-
-delay = input('Press enter to finish, but if you\'re seeing this, something broke')
