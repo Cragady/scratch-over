@@ -7,9 +7,14 @@ window = pygame.display.set_mode((600, 500), pygame.RESIZABLE)
 
 pygame.display.set_caption('Cat & Mouse')
 
+#Pathers
+dirname = os.path.dirname(__file__)
+def pather(file):
+    return os.path.join(dirname, file)
+
 #Grabbers
 w, h = pygame.display.get_surface().get_size()
-background_image = pygame.image.load('../assets/neon-tun-back.png').convert()
+background_image = pygame.image.load(pather('../assets/neon-tun-back.png')).convert()
 background_image = pygame.transform.scale(background_image, (w, h))
 
 #Sprite Template
@@ -110,10 +115,10 @@ class Sprite:
 
     def shooter(self, press, hold):
         if press:
-            bullets.append(Sprite('bullet', '../assets/bweb.png', 0.5, [Player.ccor[0], Player.ccor[1] + 5], [25, 25]))
+            bullets.append(Sprite('bullet', pather('../assets/bweb.png'), 0.5, [Player.ccor[0], Player.ccor[1] + 5], [25, 25]))
             press = False
         elif hold: 
-            bullets.append(Sprite('bullet', '../assets/bweb.png', 0.5, [Player.ccor[0], Player.ccor[1] + 5], [25, 25]))
+            bullets.append(Sprite('bullet', pather('../assets/bweb.png'), 0.5, [Player.ccor[0], Player.ccor[1] + 5], [25, 25]))
 
     
 
@@ -149,7 +154,7 @@ keys = {}
 game_loop = True
 
 #Set Player Sprite
-Player = Sprite('player', '../assets/player.png', 0.5, [w / 2, h - 40], [60, 35])
+Player = Sprite('player', pather('../assets/player.png'), 0.5, [w / 2, h - 40], [60, 35])
 #Set Bullets
 # number_of_bullets = 50
 bullets = []
@@ -159,7 +164,7 @@ bullets = []
 number_of_enemies = 10
 enem_lis = []
 for i in range(number_of_enemies):
-    enem_lis.append(Sprite('enemy', '../assets/bmouse.png', 0.05, [random.randint(0, w), random.randint(-800, -20)], [40, 65]))
+    enem_lis.append(Sprite('enemy', pather('../assets/bmouse.png'), 0.05, [random.randint(0, w), random.randint(-800, -20)], [40, 65]))
 
 #Score Watching
 def score_watcher(sc):
