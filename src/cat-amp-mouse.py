@@ -9,7 +9,7 @@ pygame.display.set_caption('Cat & Mouse')
 
 #Grabbers
 w, h = pygame.display.get_surface().get_size()
-background_image = pygame.image.load('neon-tun-back.png').convert()
+background_image = pygame.image.load('../assets/neon-tun-back.png').convert()
 background_image = pygame.transform.scale(background_image, (w, h))
 
 #Sprite Template
@@ -22,6 +22,7 @@ class Sprite:
             self.set_costumes()
         self.sprite = self.image
         self.speed = speed
+        self.origspeed = speed
         self.posIn = posIn
         self.ccor = [0, 1]
         self.setter()
@@ -74,13 +75,26 @@ class Sprite:
         if self.stype == 'enemy':
             self.check_collision(False)
             window.blit(self.sprite, (self.pos[0], self.pos[1]))
+        if self.stype == 'bullet':
+            self.check_collision(False)
+            window.blit(self.sprite, (self.pos[0], self.pos[1]))
+
 
     def check_collision(self, t1):
         #Set diff collisions for the fly-cat
-        if self.pos[0] < 0:
-            self.pos[0] = 0
-        elif self.pos[0] > w - self.width:
-            self.pos[0] = w - self.width
+        if self.stype == 'bullet':
+            if self.pos[1] < 0:
+                bullets.remove(self) 
+            if self.pos[0] < 0:
+                bullets.remove(self)
+            elif self.pos[0] > w - self.width:
+                bullets.remove(self)
+        elif self.stype == 'enemy' or 'player' or 'dropcat':
+            if self.pos[0] < 0:
+                self.pos[0] = 0
+            elif self.pos[0] > w - self.width:
+                self.pos[0] = w - self.width
+
 
         if t1 != False:
             distance = math.sqrt(math.pow(self.ccor[0] - t1.ccor[0], 2) + math.pow(self.ccor[1] - t1.ccor[1], 2))
@@ -93,6 +107,14 @@ class Sprite:
         new_cos = costumes[random.randint(0, 3)]
         self.image = pygame.image.load(new_cos['img']).convert_alpha()
         self.size = new_cos['size']
+
+    def shooter(self, press, hold):
+        if press:
+            bullets.append(Sprite('bullet', '../assets/bweb.png', 0.5, [Player.ccor[0], Player.ccor[1] + 5], [25, 25]))
+            press = False
+        elif hold: 
+            bullets.append(Sprite('bullet', '../assets/bweb.png', 0.5, [Player.ccor[0], Player.ccor[1] + 5], [25, 25]))
+
     
 
 #Enemy Costumes
@@ -123,15 +145,21 @@ key_space = False
 level = 1
 score = 0
 lives = 3
+keys = {}
 game_loop = True
 
 #Set Player Sprite
-Player = Sprite('player', 'player.png', 0.5, [w / 2, h - 40], [60, 35])
+Player = Sprite('player', '../assets/player.png', 0.5, [w / 2, h - 40], [60, 35])
+#Set Bullets
+# number_of_bullets = 50
+bullets = []
+# for i in range(number_of_bullets):
+#     bullets.append(Sprite('bullet', 'bweb.png', 0.75, [Player.ccor[0], Player.ccor[1] + 5], [25, 25]))
 #Set Enemies
-number_of_enemies = 20
+number_of_enemies = 10
 enem_lis = []
 for i in range(number_of_enemies):
-    enem_lis.append(Sprite('enemy', 'bmouse.png', 0.05, [random.randint(0, w), random.randint(-800, -20)], [40, 65]))
+    enem_lis.append(Sprite('enemy', '../assets/bmouse.png', 0.05, [random.randint(0, w), random.randint(-800, -20)], [40, 65]))
 
 #Score Watching
 def score_watcher(sc):
@@ -158,6 +186,7 @@ def pause(pauser):
                     sys.exit()
 
 while game_loop:
+    # speedwatcher = 1
     window.blit(background_image, [0, 0])
 
     #The below is for sizing and resizing purposes //if I get to it that is
@@ -165,10 +194,14 @@ while game_loop:
     #     window.get_height()/3, window.get_width()/3,
     #     window.get_height()/3))
     
-    #Show Player
-    Player.handle_spawn()
-    for Eneblitz in enem_lis:
-        Eneblitz.handle_spawn()
+    #Show Sprites
+    # Player.handle_spawn()
+    # for Bullet in bullets:
+    #     Bullet.handle_spawn()
+    #     Bullet.change_speed(speedwatcher)
+
+    # for Eneblitz in enem_lis:
+    #     Eneblitz.handle_spawn()
 
     #Events
     for event in pygame.event.get():
@@ -177,11 +210,19 @@ while game_loop:
             sys.exit()
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT:
-                key_left = True
+                # key_left = True
+                keys['key_left'] = True
             elif event.key == pygame.K_RIGHT:
-                key_right = True
+                # key_right = True
+                keys['key_right'] = True
             elif event.key == pygame.K_SPACE:
-                key_space == True
+                if level < 3:
+                    keys['space_press'] = True
+                    # bullets.append(Sprite('bullet', 'bweb.png', 0.75, [Player.ccor[0], Player.ccor[1] + 5], [25, 25]))
+                else:
+                    keys['key_space'] = True
+                    # key_space = True
+                        
             elif event.key == pygame.K_RETURN:
                 pause(True)
             elif event.key == pygame.K_ESCAPE:
@@ -191,17 +232,33 @@ while game_loop:
                 sys.exit()
         elif event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT:
-                key_left = False
+                # key_left = False
+                del keys['key_left']
             elif event.key == pygame.K_RIGHT:
-                key_right = False
+                # key_right = False
+                del keys['key_right']
+            elif event.key == pygame.K_SPACE:
+                if level < 3:
+                    del keys['space_press']
+                else:
+                    del keys['key_space']
 
     #Score Listener
     score_watcher(score)
 
-    #Movement/Collision listeners
-    Player.movement(key_left, key_right, False, False)
+    #Keys/Collision listeners
+    Player.handle_spawn()
+    Player.movement(keys.get('key_left', False), keys.get('key_right', False), False, False)
+    Player.shooter(keys.get('space_press'), keys.get('key_space'))
+    for Bullet in bullets:
+        Bullet.handle_spawn()
+        Bullet.movement(False, False, False, True)
 
     for Enemies in enem_lis:
+        # Enemies.check_collision(Bullet) #This may be different
+        Enemies.handle_spawn()
+        for Bullet in bullets:
+            Enemies.check_collision(Bullet)
         Enemies.check_collision(Player)
         Enemies.movement(False, False, True, False)
         
