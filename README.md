@@ -17,6 +17,7 @@ So far, it seems like all of my code is spaghetti, but it works.
 * Lvl 2: fly-cat, here it adds extra life
 * Lvl 3: Drop-cat
 * @ Lvl 4: fly-cat adds extra shooting too
+* Will prolly have triple shooting by blitting three webs at a time, then adding positive and negative speeds on the y axis on the corresponding webs that should shoot to the sides
 
 # Later Things
 
