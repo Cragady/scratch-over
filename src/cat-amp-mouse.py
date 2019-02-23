@@ -9,6 +9,10 @@ window = pygame.display.set_mode((600, 500))
 
 pygame.display.set_caption('Cat & Mouse')
 
+#Set Text Pt.1
+myfont = pygame.font.SysFont('Arial', 20)
+text_surface = pygame.Surface((100, 75))
+
 #Pathers
 dirname = os.path.dirname(__file__)
 def pather(file):
@@ -19,13 +23,79 @@ w, h = pygame.display.get_surface().get_size()
 background_image = pygame.image.load(pather('../assets/neon-tun-back.png')).convert()
 background_image = pygame.transform.scale(background_image, (w, h))
 
+class game_vars:
+        #Enemy Costumes
+    costumes = [
+        {
+            'img': 'bmouse.png',
+            'size': [40, 65]
+        },
+        {
+            'img': 'b-c.png',
+            'size': [40, 65]
+        },
+        {
+            'img': 'b-a.png',
+            'size': [40, 65]
+        },
+        {
+            'img': 'b-t.png',
+            'size': [40,65]
+        }
+    ]
+
+    #Game Vars
+    level = 1
+    score = 0
+    lives = 10
+    speed_enem = 1
+    speed_all = 1 
+    firing = True
+    keys = {}
+    game_loop = True
+
+    #Score Watching
+    def score_watcher(self, sc):
+        if sc < 20:
+            return 1
+        elif sc >= 20 and sc <= 29:
+            return 2
+        elif sc >= 30 and sc <= 49:
+            return 3
+        elif sc >= 50:
+            return 4
+
+    def speed_watcher(self, sall, enem):
+        if sall:
+            return len(bullets) * 0.06 + 1
+        else: 
+            if Gvar.level < 3:
+                return len(bullets) * 0.06 + 1
+            else: 
+                return len(bullets) * 0.06 + 3
+                
+    def pause(self, pauser):
+        while pauser == True:
+            for event in pygame.event.get():
+                if (event.type == pygame.QUIT):
+                    pygame.quit()
+                    sys.exit()
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        pauser = False
+                    elif event.key == pygame.K_RETURN:
+                        pauser = False
+                    elif event.key == pygame.K_F4 and pygame.key.get_mods() & pygame.KMOD_ALT:
+                        pygame.quit()
+                        sys.exit()
+
 #Sprite Template
 class Sprite:
     def __init__(self, stype, image, speed, posIn, size):
         self.stype = stype
         self.image = pygame.image.load(image).convert_alpha()
         self.size = size
-        if stype == 'enemy' and level >= 4:
+        if stype == 'enemy' and Gvar.level >= 4:
             self.set_costumes()
         self.sprite = self.image
         self.speed = speed
@@ -38,7 +108,6 @@ class Sprite:
 
     def set_size(self):
         self.sprite = pygame.transform.scale(self.sprite, self.size)
-
 
     def set_pos(self):
         self.posIn[0] -= self.width * 0.5
@@ -63,7 +132,6 @@ class Sprite:
 
     def movement(self, ldir, rdir, ddir, udir, spe_schange):
         self.set_centers()
-        global lives
         if ldir:
             self.pos[0] -= self.speed * spe_schange
             if self.pos[0] < 0:
@@ -77,7 +145,7 @@ class Sprite:
             if self.pos[1] > h:
                 if self.stype == 'enemy':
                     self.pos = [random.randint(0, w), random.randint(-800, -20)]
-                    lives -= 1
+                    Gvar.lives -= 1
         elif udir:
             self.pos[1] -= self.speed * spe_schange
 
@@ -121,8 +189,7 @@ class Sprite:
                     return True
 
     def set_costumes(self):
-        global costumes
-        new_cos = costumes[random.randint(0, 3)]
+        new_cos = Gvar.costumes[random.randint(0, 3)]
         self.image = pygame.image.load(new_cos['img']).convert_alpha()
         self.size = new_cos['size']
 
@@ -151,46 +218,8 @@ class Sprite:
     def shoot_timer(self):
         self.shooting = True
 
-    
-
-#Enemy Costumes
-costumes = [
-    {
-        'img': 'bmouse.png',
-        'size': [40, 65]
-    },
-    {
-        'img': 'b-c.png',
-        'size': [40, 65]
-    },
-    {
-        'img': 'b-a.png',
-        'size': [40, 65]
-    },
-    {
-        'img': 'b-t.png',
-        'size': [40,65]
-    }
-]
-
-#Game Vars
-player_dir = False
-key_left = False
-key_right = False
-key_space = False
-level = 1
-score = 0
-lives = 10
-speed_enem = 1
-speed_all = 1 
-firing = True
-keys = {}
-game_loop = True
-
-#Set Text
-myfont = pygame.font.SysFont('Arial', 20)
-text_surface = pygame.Surface((100, 75))
-
+#Knitting more game vars
+Gvar = game_vars()
 #Set Player Sprite
 Player = Sprite('player', pather('../assets/player.png'), 0.4, [w / 2, h - 40], [60, 45])
 #Set Bullets
@@ -205,120 +234,88 @@ enem_lis = []
 for i in range(number_of_enemies):
     enem_lis.append(Sprite('enemy', pather('../assets/bmouse.png'), 0.12, [random.randint(0, w), random.randint(-1200, -20)], [50, 65]))
 
-#Score Watching
-def score_watcher(sc):
-    if sc < 20:
-        return 1
-    elif sc >= 20 and sc <= 29:
-        return 2
-    elif sc >= 30 and sc <= 49:
-        return 3
-    elif sc >= 50:
-        return 4
+def main():
 
-def speed_watcher(sall, enem):
-    if sall:
-        return len(bullets) * 0.06 + 1
-    else: 
-        if level < 3:
-            return len(bullets) * 0.06 + 1
-        else: 
-            return len(bullets) * 0.06 + 3
+    while Gvar.game_loop:
+        if Gvar.lives < 0:
+                Gvar.game_loop = False
+        # speedwatcher = 1
+        window.blit(background_image, [0, 0])
+        #The below is for sizing and resizing purposes //if I get to it that is
+        # pygame.draw.rect(window, (200, 0, 0), (window.get_width()/3, 
+        #     window.get_height()/3, window.get_width()/3,
+        #     window.get_height()/3))
 
-def pause(pauser):
-    while pauser == True:
+        #Events
         for event in pygame.event.get():
             if (event.type == pygame.QUIT):
                 pygame.quit()
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    pauser = False
+                if event.key == pygame.K_LEFT:
+                    # key_left = True
+                    Gvar.keys['key_left'] = True
+                elif event.key == pygame.K_RIGHT:
+                    # key_right = True
+                    Gvar.keys['key_right'] = True
+                elif event.key == pygame.K_SPACE:
+                    Gvar.keys['key_space'] = True
+                            
                 elif event.key == pygame.K_RETURN:
-                    pauser = False
+                    Gvar.pause(True)
+                elif event.key == pygame.K_ESCAPE:
+                    Gvar.game_loop = False
                 elif event.key == pygame.K_F4 and pygame.key.get_mods() & pygame.KMOD_ALT:
                     pygame.quit()
                     sys.exit()
+            elif event.type == pygame.KEYUP:
+                if event.key == pygame.K_LEFT:
+                    del Gvar.keys['key_left']
+                elif event.key == pygame.K_RIGHT:
+                    del Gvar.keys['key_right']
+                elif event.key == pygame.K_SPACE:
+                    Player.shot = False
+                    del Gvar.keys['key_space']
 
-while game_loop:
-    if lives < 0:
-            game_loop = False
-    # speedwatcher = 1
-    window.blit(background_image, [0, 0])
-    #The below is for sizing and resizing purposes //if I get to it that is
-    # pygame.draw.rect(window, (200, 0, 0), (window.get_width()/3, 
-    #     window.get_height()/3, window.get_width()/3,
-    #     window.get_height()/3))
+        #Score Listener
+        Gvar.level = Gvar.score_watcher(Gvar.score)
 
-    #Events
-    for event in pygame.event.get():
-        if (event.type == pygame.QUIT):
-            pygame.quit()
-            sys.exit()
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_LEFT:
-                # key_left = True
-                keys['key_left'] = True
-            elif event.key == pygame.K_RIGHT:
-                # key_right = True
-                keys['key_right'] = True
-            elif event.key == pygame.K_SPACE:
-                keys['key_space'] = True
-                        
-            elif event.key == pygame.K_RETURN:
-                pause(True)
-            elif event.key == pygame.K_ESCAPE:
-                game_loop = False
-            elif event.key == pygame.K_F4 and pygame.key.get_mods() & pygame.KMOD_ALT:
-                pygame.quit()
-                sys.exit()
-        elif event.type == pygame.KEYUP:
-            if event.key == pygame.K_LEFT:
-                del keys['key_left']
-            elif event.key == pygame.K_RIGHT:
-                del keys['key_right']
-            elif event.key == pygame.K_SPACE:
-                Player.shot = False
-                del keys['key_space']
-
-    #Score Listener
-    level = score_watcher(score)
-
-    #Keys/Collision listeners
-    Player.handle_spawn()
-    Player.movement(keys.get('key_left', False), keys.get('key_right', False), False, False, speed_watcher(True, False))
-    if level < 3:
-        Player.shooter(keys.get('key_space'), False, level)
-    else: 
-        Player.shooter(False, keys.get('key_space'), level)
-    # Player.shooter(keys.get('key_space'), keys.get('space_press'))
-    for Bullet in bullets:
-        Bullet.handle_spawn()
-        Bullet.movement(False, False, False, True, speed_watcher(True, False))
-
-    for Enemies in enem_lis:
-        # Enemies.check_collision(Bullet) #This may be different
-        Enemies.handle_spawn()
+        #Keys/Collision listeners
+        Player.handle_spawn()
+        Player.movement(Gvar.keys.get('key_left', False), Gvar.keys.get('key_right', False), False, False, Gvar.speed_watcher(True, False))
+        if Gvar.level < 3:
+            Player.shooter(Gvar.keys.get('key_space'), False, Gvar.level)
+        else: 
+            Player.shooter(False, Gvar.keys.get('key_space'), Gvar.level)
+        # Player.shooter(Gvar.keys.get('key_space'), Gvar.keys.get('space_press'))
         for Bullet in bullets:
-            if Enemies.check_collision(Bullet):
-                score += 1
-                print(score)
-        Enemies.movement(False, False, True, False, speed_watcher(False, True))
-    
-    #Setting Text
-    lives_write = str(lives)
-    if lives < 0:
-        lives_write = 0
-    scoresurface = myfont.render(f'Score: {str(score)}', False, (0, 0, 0))
-    livessurface = myfont.render(f'Lives: {str(lives_write)}', False, (0, 0, 0))
-    levelsurface = myfont.render(f'Level: {str(level)}', False, (0, 0, 0))
-    text_surface.fill((255, 255, 255))
-    text_surface.blit(scoresurface, (0, 0))
-    text_surface.blit(livessurface, (0, 20))
-    text_surface.blit(levelsurface, (0, 40))
-    text_surface.set_alpha(200)
-    window.blit(text_surface, (0, 0))
-    # window.blit(scoresurface, (0, 0))
+            Bullet.handle_spawn()
+            Bullet.movement(False, False, False, True, Gvar.speed_watcher(True, False))
 
-    #Update Portions of screen
-    pygame.display.update()
+        for Enemies in enem_lis:
+            # Enemies.check_collision(Bullet) #This may be different
+            Enemies.handle_spawn()
+            for Bullet in bullets:
+                if Enemies.check_collision(Bullet):
+                    Gvar.score += 1
+            Enemies.movement(False, False, True, False, Gvar.speed_watcher(False, True))
+        
+        #Setting Text
+        lives_write = str(Gvar.lives)
+        if Gvar.lives < 0:
+            lives_write = 0
+        scoresurface = myfont.render(f'Score: {str(Gvar.score)}', False, (0, 0, 0))
+        livessurface = myfont.render(f'Lives: {str(lives_write)}', False, (0, 0, 0))
+        levelsurface = myfont.render(f'Level: {str(Gvar.level)}', False, (0, 0, 0))
+        text_surface.fill((255, 255, 255))
+        text_surface.blit(scoresurface, (0, 0))
+        text_surface.blit(livessurface, (0, 20))
+        text_surface.blit(levelsurface, (0, 40))
+        text_surface.set_alpha(200)
+        window.blit(text_surface, (0, 0))
+        # window.blit(scoresurface, (0, 0))
+
+        #Update Portions of screen
+        pygame.display.update()
+
+main()
