@@ -32,6 +32,7 @@ class Sprite:
         self.posIn = posIn
         self.ccor = [0, 1]
         self.shooting = True
+        self.shot = False
         self.setter()
 
     def set_size(self):
@@ -59,22 +60,22 @@ class Sprite:
         self.set_trackers()
         self.set_pos()
 
-    def movement(self, ldir, rdir, ddir, udir):
+    def movement(self, ldir, rdir, ddir, udir, spe_schange):
         self.set_centers()
         if ldir:
-            self.pos[0] -= self.speed
+            self.pos[0] -= self.speed * spe_schange
             if self.pos[0] < 0:
                 self.pos[0] = 0
         elif rdir: 
-            self.pos[0] += self.speed
+            self.pos[0] += self.speed * spe_schange
             if self.pos[0] > w - self.width:
                 self.pos[0] = w - self.width
         elif ddir:
-            self.pos[1] += self.speed
+            self.pos[1] += self.speed * spe_schange
             if self.pos[1] > h:
                 self.pos = [random.randint(0, w), random.randint(-800, -20)]
         elif udir:
-            self.pos[1] -= self.speed
+            self.pos[1] -= self.speed * spe_schange
 
     def handle_spawn(self):
         if self.stype == 'player':
@@ -91,15 +92,12 @@ class Sprite:
         #Set diff collisions for the fly-cat
         if self.stype == 'bullet':
             if self.pos[1] < 0:
-                # bullets.remove(self) 
                 bullpop = bullets.index(self)
                 pre_bullets.append(bullets.pop(bullpop))
             if self.pos[0] < 0:
-                # bullets.remove(self) 
                 bullpop = bullets.index(self)
                 pre_bullets.append(bullets.pop(bullpop))
             elif self.pos[0] > w - self.width:
-                # bullets.remove(self) 
                 bullpop = bullets.index(self)
                 pre_bullets.append(bullets.pop(bullpop))
         elif self.stype == 'enemy' or 'player' or 'dropcat':
@@ -115,6 +113,7 @@ class Sprite:
             if distance < 45:
                 if(self.stype == 'enemy'):
                     self.pos = [random.randint(0, w), random.randint(-800, -20)]
+                    return True
 
     def set_costumes(self):
         global costumes
@@ -127,24 +126,22 @@ class Sprite:
             pre_bullets[0].pos = [self.ccor[0], self.ccor[1]]
             bullets.append(pre_bullets.pop(0))
 
-    def shooter(self, press, hold):
-        if self.shooting == False:
+    def shooter(self, press, hold, lvl):
+        if self.shooting == False or self.shot == True:
             return
         if press:
             # bullets.append(Sprite('bullet', pather('../assets/bweb2.png'), 0.5, [Player.ccor[0], Player.ccor[1] + 5], [25, 25]))
             self.array_mover()
-            press = False
+            self.shooting = False
+            self.shot = True
+            Timer(0.3, self.shoot_timer).start()
         elif hold: 
             # bullets.append(Sprite('bullet', pather('../assets/bweb2.png'), 0.5, [Player.ccor[0], Player.ccor[1] + 5], [25, 25]))
             self.array_mover()
+            self.shooting = False
+            Timer(0.05, self.shoot_timer).start()
         else:
             return
-        self.shooting = False
-        if level < 3:
-            # Timer(0.3, self.shoot_timer).start()
-            Timer(0.05, self.shoot_timer).start()
-        elif level > 3:
-            Timer(0.1, self.shoot_timer).start()
 
     def shoot_timer(self):
         self.shooting = True
@@ -179,6 +176,8 @@ key_space = False
 level = 1
 score = 0
 lives = 3
+speed_enem = 1
+speed_all = 1 
 firing = True
 keys = {}
 game_loop = True
@@ -195,16 +194,27 @@ for i in range(number_of_bullets):
 number_of_enemies = 20
 enem_lis = []
 for i in range(number_of_enemies):
-    enem_lis.append(Sprite('enemy', pather('../assets/bmouse.png'), 0.05, [random.randint(0, w), random.randint(-800, -20)], [40, 65]))
+    enem_lis.append(Sprite('enemy', pather('../assets/bmouse.png'), 0.1, [random.randint(0, w), random.randint(-800, -20)], [40, 65]))
 
 #Score Watching
 def score_watcher(sc):
-    if sc >= 20 and sc <= 29:
-        level = 2
+    if sc < 20:
+        return 1
+    elif sc >= 20 and sc <= 29:
+        return 2
     elif sc >= 30 and sc <= 49:
-        level = 3
-    elif sc >= 50 and sc <= 69:
-        level = 4
+        return 3
+    elif sc >= 50:
+        return 4
+
+def speed_watcher(sall, enem):
+    if sall:
+        return len(bullets) * 0.06 + 1
+    else: 
+        if level < 3:
+            return len(bullets) * 0.06 + 1
+        else: 
+            return len(bullets) * 0.06 + 3
 
 def pause(pauser):
     while pauser == True:
@@ -252,12 +262,7 @@ while game_loop:
                 # key_right = True
                 keys['key_right'] = True
             elif event.key == pygame.K_SPACE:
-                if level < 3:
-                    keys['space_press'] = True
-                    # bullets.append(Sprite('bullet', 'bweb.png', 0.75, [Player.ccor[0], Player.ccor[1] + 5], [25, 25]))
-                else:
-                    keys['key_space'] = True
-                    # key_space = True
+                keys['key_space'] = True
                         
             elif event.key == pygame.K_RETURN:
                 pause(True)
@@ -268,34 +273,36 @@ while game_loop:
                 sys.exit()
         elif event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT:
-                # key_left = False
                 del keys['key_left']
             elif event.key == pygame.K_RIGHT:
-                # key_right = False
                 del keys['key_right']
             elif event.key == pygame.K_SPACE:
-                if level < 3:
-                    del keys['space_press']
-                else:
-                    del keys['key_space']
+                Player.shot = False
+                del keys['key_space']
 
     #Score Listener
-    score_watcher(score)
+    level = score_watcher(score)
 
     #Keys/Collision listeners
     Player.handle_spawn()
-    Player.movement(keys.get('key_left', False), keys.get('key_right', False), False, False)
-    Player.shooter(keys.get('space_press'), keys.get('key_space'))
+    Player.movement(keys.get('key_left', False), keys.get('key_right', False), False, False, speed_watcher(True, False))
+    if level < 3:
+        Player.shooter(keys.get('key_space'), False, level)
+    else: 
+        Player.shooter(False, keys.get('key_space'), level)
+    # Player.shooter(keys.get('key_space'), keys.get('space_press'))
     for Bullet in bullets:
         Bullet.handle_spawn()
-        Bullet.movement(False, False, False, True)
+        Bullet.movement(False, False, False, True, speed_watcher(True, False))
 
     for Enemies in enem_lis:
         # Enemies.check_collision(Bullet) #This may be different
         Enemies.handle_spawn()
         for Bullet in bullets:
-            Enemies.check_collision(Bullet)
-        Enemies.movement(False, False, True, False)
+            if Enemies.check_collision(Bullet):
+                score += 1
+                print(score)
+        Enemies.movement(False, False, True, False, speed_watcher(False, True))
         
 
     #Update Portions of screen
