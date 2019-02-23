@@ -1,5 +1,6 @@
 import pygame, sys, os, random, math, winsound
 from pygame.locals import *
+from threading import Timer
 
 pygame.init()
 
@@ -30,6 +31,7 @@ class Sprite:
         self.origspeed = speed
         self.posIn = posIn
         self.ccor = [0, 1]
+        self.shooting = True
         self.setter()
 
     def set_size(self):
@@ -89,12 +91,19 @@ class Sprite:
         #Set diff collisions for the fly-cat
         if self.stype == 'bullet':
             if self.pos[1] < 0:
-                bullets.remove(self) 
+                # bullets.remove(self) 
+                bullpop = bullets.index(self)
+                pre_bullets.append(bullets.pop(bullpop))
             if self.pos[0] < 0:
-                bullets.remove(self)
+                # bullets.remove(self) 
+                bullpop = bullets.index(self)
+                pre_bullets.append(bullets.pop(bullpop))
             elif self.pos[0] > w - self.width:
-                bullets.remove(self)
+                # bullets.remove(self) 
+                bullpop = bullets.index(self)
+                pre_bullets.append(bullets.pop(bullpop))
         elif self.stype == 'enemy' or 'player' or 'dropcat':
+        # if self.stype == 'enemy' or 'player' or 'dropcat':
             if self.pos[0] < 0:
                 self.pos[0] = 0
             elif self.pos[0] > w - self.width:
@@ -113,12 +122,32 @@ class Sprite:
         self.image = pygame.image.load(new_cos['img']).convert_alpha()
         self.size = new_cos['size']
 
+    def array_mover(self):
+        if len(pre_bullets) > 0:
+            pre_bullets[0].pos = [self.ccor[0], self.ccor[1]]
+            bullets.append(pre_bullets.pop(0))
+
     def shooter(self, press, hold):
+        if self.shooting == False:
+            return
         if press:
-            bullets.append(Sprite('bullet', pather('../assets/bweb.png'), 0.5, [Player.ccor[0], Player.ccor[1] + 5], [25, 25]))
+            # bullets.append(Sprite('bullet', pather('../assets/bweb2.png'), 0.5, [Player.ccor[0], Player.ccor[1] + 5], [25, 25]))
+            self.array_mover()
             press = False
         elif hold: 
-            bullets.append(Sprite('bullet', pather('../assets/bweb.png'), 0.5, [Player.ccor[0], Player.ccor[1] + 5], [25, 25]))
+            # bullets.append(Sprite('bullet', pather('../assets/bweb2.png'), 0.5, [Player.ccor[0], Player.ccor[1] + 5], [25, 25]))
+            self.array_mover()
+        else:
+            return
+        self.shooting = False
+        if level < 3:
+            # Timer(0.3, self.shoot_timer).start()
+            Timer(0.05, self.shoot_timer).start()
+        elif level > 3:
+            Timer(0.1, self.shoot_timer).start()
+
+    def shoot_timer(self):
+        self.shooting = True
 
     
 
@@ -150,18 +179,20 @@ key_space = False
 level = 1
 score = 0
 lives = 3
+firing = True
 keys = {}
 game_loop = True
 
 #Set Player Sprite
 Player = Sprite('player', pather('../assets/player.png'), 0.5, [w / 2, h - 40], [60, 35])
 #Set Bullets
-# number_of_bullets = 50
+number_of_bullets = 50
 bullets = []
-# for i in range(number_of_bullets):
-#     bullets.append(Sprite('bullet', 'bweb.png', 0.75, [Player.ccor[0], Player.ccor[1] + 5], [25, 25]))
+pre_bullets = []
+for i in range(number_of_bullets):
+    pre_bullets.append(Sprite('bullet', pather('../assets/bweb.png'), 0.75, [Player.ccor[0], Player.ccor[1] + 5], [25, 25]))
 #Set Enemies
-number_of_enemies = 10
+number_of_enemies = 20
 enem_lis = []
 for i in range(number_of_enemies):
     enem_lis.append(Sprite('enemy', pather('../assets/bmouse.png'), 0.05, [random.randint(0, w), random.randint(-800, -20)], [40, 65]))
@@ -264,7 +295,6 @@ while game_loop:
         Enemies.handle_spawn()
         for Bullet in bullets:
             Enemies.check_collision(Bullet)
-        Enemies.check_collision(Player)
         Enemies.movement(False, False, True, False)
         
 
