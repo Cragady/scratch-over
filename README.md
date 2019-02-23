@@ -11,6 +11,9 @@ A week or two ago (Date today is 2/22/19), I decided to learn a little bit of Py
 So far, it seems like all of my code is spaghetti, but it works.
 
 # To Do
+* Change insano speed to lvl 4
+* change insano shooting to lvl 3
+* Add in animation for letting player know that they have automatic shooting
 * Lvl 2: fly-cat, here it adds extra life
 * Lvl 3: Drop-cat
 * @ Lvl 4: fly-cat adds extra shooting too
