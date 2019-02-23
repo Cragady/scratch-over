@@ -92,11 +92,12 @@ class game_vars:
 #Sprite Template
 class Sprite:
     def __init__(self, stype, image, speed, posIn, size):
+        self.second_init(stype, image, speed, posIn, size)
+
+    def second_init(self, stype, image, speed, posIn, size):
         self.stype = stype
         self.image = pygame.image.load(image).convert_alpha()
         self.size = size
-        if stype == 'enemy' and Gvar.level >= 4:
-            self.set_costumes()
         self.sprite = self.image
         self.speed = speed
         self.origspeed = speed
@@ -144,6 +145,7 @@ class Sprite:
             self.pos[1] += self.speed * spe_schange
             if self.pos[1] > h:
                 if self.stype == 'enemy':
+                    self.set_costumes()
                     self.pos = [random.randint(0, w), random.randint(-800, -20)]
                     Gvar.lives -= 1
         elif udir:
@@ -154,7 +156,8 @@ class Sprite:
             window.blit(self.sprite, (self.pos[0], self.pos[1]))
         if self.stype == 'enemy':
             self.check_collision(False)
-            window.blit(self.sprite, (self.pos[0], self.pos[1]))
+            if self.pos[1] >= 0:
+                window.blit(self.sprite, (self.pos[0], self.pos[1]))
         if self.stype == 'bullet':
             self.check_collision(False)
             window.blit(self.sprite, (self.pos[0], self.pos[1]))
@@ -163,14 +166,8 @@ class Sprite:
     def check_collision(self, t1):
         #Set diff collisions for the fly-cat
         if self.stype == 'bullet':
-            if self.pos[1] < 0:
-                bullpop = bullets.index(self)
-                pre_bullets.append(bullets.pop(bullpop))
-            if self.pos[0] < 0:
-                bullpop = bullets.index(self)
-                pre_bullets.append(bullets.pop(bullpop))
-            elif self.pos[0] > w - self.width:
-                bullpop = bullets.index(self)
+            bullpop = bullets.index(self)
+            if (self.pos[1] or self.pos[0]) < 0 or self.pos[0] > w - self.width:
                 pre_bullets.append(bullets.pop(bullpop))
         elif self.stype == 'enemy' or 'player' or 'dropcat':
         # if self.stype == 'enemy' or 'player' or 'dropcat':
@@ -185,13 +182,16 @@ class Sprite:
                 if(self.stype == 'enemy'):
                     bullpop = bullets.index(t1)
                     pre_bullets.append(bullets.pop(bullpop))
+                    self.set_costumes()
                     self.pos = [random.randint(0, w), random.randint(-800, -20)]
                     return True
 
     def set_costumes(self):
-        new_cos = Gvar.costumes[random.randint(0, 3)]
-        self.image = pygame.image.load(new_cos['img']).convert_alpha()
-        self.size = new_cos['size']
+        if self.pos[1] < 0 and Gvar.level > 3:
+            new_cos = Gvar.costumes[random.randint(0, 3)]
+            self.image = pather(f'../assets/{new_cos["img"]}')
+            self.size = new_cos['size']
+            self.second_init(self.stype, self.image, self.speed, self.posIn, self.size)
 
     def array_mover(self):
         if len(pre_bullets) > 0:
@@ -226,12 +226,13 @@ Player = Sprite('player', pather('../assets/player.png'), 0.4, [w / 2, h - 40], 
 number_of_bullets = 50
 bullets = []
 pre_bullets = []
-for i in range(number_of_bullets):
+for bulletss in range(number_of_bullets):
     pre_bullets.append(Sprite('bullet', pather('../assets/bweb2.png'), 0.35, [Player.ccor[0], Player.ccor[1] + 5], [25, 25]))
 #Set Enemies
 number_of_enemies = 15
 enem_lis = []
-for i in range(number_of_enemies):
+temp_enem = []
+for enemiess in range(number_of_enemies):
     enem_lis.append(Sprite('enemy', pather('../assets/bmouse.png'), 0.12, [random.randint(0, w), random.randint(-1200, -20)], [50, 65]))
 
 def main():
