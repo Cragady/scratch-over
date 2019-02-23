@@ -3,8 +3,9 @@ from pygame.locals import *
 from threading import Timer
 
 pygame.init()
+pygame.font.init()
 
-window = pygame.display.set_mode((600, 500), pygame.RESIZABLE)
+window = pygame.display.set_mode((600, 500))
 
 pygame.display.set_caption('Cat & Mouse')
 
@@ -62,6 +63,7 @@ class Sprite:
 
     def movement(self, ldir, rdir, ddir, udir, spe_schange):
         self.set_centers()
+        global lives
         if ldir:
             self.pos[0] -= self.speed * spe_schange
             if self.pos[0] < 0:
@@ -73,7 +75,9 @@ class Sprite:
         elif ddir:
             self.pos[1] += self.speed * spe_schange
             if self.pos[1] > h:
-                self.pos = [random.randint(0, w), random.randint(-800, -20)]
+                if self.stype == 'enemy':
+                    self.pos = [random.randint(0, w), random.randint(-800, -20)]
+                    lives -= 1
         elif udir:
             self.pos[1] -= self.speed * spe_schange
 
@@ -107,11 +111,12 @@ class Sprite:
             elif self.pos[0] > w - self.width:
                 self.pos[0] = w - self.width
 
-
         if t1 != False:
             distance = math.sqrt(math.pow(self.ccor[0] - t1.ccor[0], 2) + math.pow(self.ccor[1] - t1.ccor[1], 2))
-            if distance < 45:
+            if distance < 35:
                 if(self.stype == 'enemy'):
+                    bullpop = bullets.index(t1)
+                    pre_bullets.append(bullets.pop(bullpop))
                     self.pos = [random.randint(0, w), random.randint(-800, -20)]
                     return True
 
@@ -134,7 +139,7 @@ class Sprite:
             self.array_mover()
             self.shooting = False
             self.shot = True
-            Timer(0.3, self.shoot_timer).start()
+            Timer(0.1, self.shoot_timer).start()
         elif hold: 
             # bullets.append(Sprite('bullet', pather('../assets/bweb2.png'), 0.5, [Player.ccor[0], Player.ccor[1] + 5], [25, 25]))
             self.array_mover()
@@ -175,26 +180,30 @@ key_right = False
 key_space = False
 level = 1
 score = 0
-lives = 3
+lives = 10
 speed_enem = 1
 speed_all = 1 
 firing = True
 keys = {}
 game_loop = True
 
+#Set Text
+myfont = pygame.font.SysFont('Arial', 20)
+text_surface = pygame.Surface((100, 75))
+
 #Set Player Sprite
-Player = Sprite('player', pather('../assets/player.png'), 0.5, [w / 2, h - 40], [60, 35])
+Player = Sprite('player', pather('../assets/player.png'), 0.4, [w / 2, h - 40], [60, 45])
 #Set Bullets
 number_of_bullets = 50
 bullets = []
 pre_bullets = []
 for i in range(number_of_bullets):
-    pre_bullets.append(Sprite('bullet', pather('../assets/bweb.png'), 0.75, [Player.ccor[0], Player.ccor[1] + 5], [25, 25]))
+    pre_bullets.append(Sprite('bullet', pather('../assets/bweb2.png'), 0.35, [Player.ccor[0], Player.ccor[1] + 5], [25, 25]))
 #Set Enemies
-number_of_enemies = 20
+number_of_enemies = 15
 enem_lis = []
 for i in range(number_of_enemies):
-    enem_lis.append(Sprite('enemy', pather('../assets/bmouse.png'), 0.1, [random.randint(0, w), random.randint(-800, -20)], [40, 65]))
+    enem_lis.append(Sprite('enemy', pather('../assets/bmouse.png'), 0.12, [random.randint(0, w), random.randint(-1200, -20)], [50, 65]))
 
 #Score Watching
 def score_watcher(sc):
@@ -232,22 +241,14 @@ def pause(pauser):
                     sys.exit()
 
 while game_loop:
+    if lives < 0:
+            game_loop = False
     # speedwatcher = 1
     window.blit(background_image, [0, 0])
-
     #The below is for sizing and resizing purposes //if I get to it that is
     # pygame.draw.rect(window, (200, 0, 0), (window.get_width()/3, 
     #     window.get_height()/3, window.get_width()/3,
     #     window.get_height()/3))
-    
-    #Show Sprites
-    # Player.handle_spawn()
-    # for Bullet in bullets:
-    #     Bullet.handle_spawn()
-    #     Bullet.change_speed(speedwatcher)
-
-    # for Eneblitz in enem_lis:
-    #     Eneblitz.handle_spawn()
 
     #Events
     for event in pygame.event.get():
@@ -303,7 +304,21 @@ while game_loop:
                 score += 1
                 print(score)
         Enemies.movement(False, False, True, False, speed_watcher(False, True))
-        
+    
+    #Setting Text
+    lives_write = str(lives)
+    if lives < 0:
+        lives_write = 0
+    scoresurface = myfont.render(f'Score: {str(score)}', False, (0, 0, 0))
+    livessurface = myfont.render(f'Lives: {str(lives_write)}', False, (0, 0, 0))
+    levelsurface = myfont.render(f'Level: {str(level)}', False, (0, 0, 0))
+    text_surface.fill((255, 255, 255))
+    text_surface.blit(scoresurface, (0, 0))
+    text_surface.blit(livessurface, (0, 20))
+    text_surface.blit(levelsurface, (0, 40))
+    text_surface.set_alpha(200)
+    window.blit(text_surface, (0, 0))
+    # window.blit(scoresurface, (0, 0))
 
     #Update Portions of screen
     pygame.display.update()
