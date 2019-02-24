@@ -1,4 +1,4 @@
-import pygame, sys, os, random, math, winsound
+import pygame, sys, os, random, math, winsound, time
 from pygame.locals import *
 from threading import Timer
 
@@ -51,6 +51,7 @@ class game_vars:
         self.keys = {}
         self.game_loop = True
         self.messgo = True
+        self.first_time = True
         self.firstxt = True
         self.secondtxt = False
         self.thirdtxt = False
@@ -77,6 +78,10 @@ class game_vars:
             #1white col = 255, 255, 255
             #2Pink col = 255, 153, 229
             #3blue col = 0, 255, 255
+            if self.first_time:
+                self.first_time = False
+                # self.message_timer()
+                Timer(0.2, self.message_timer, [20]).start()
             if self.firstxt:
                 self.messcolor = [255, 255, 255]
             elif self.secondtxt:
@@ -95,6 +100,31 @@ class game_vars:
             self.mess_surface.blit(spaceage, (mw * 0.5 - sw * 0.5, mh * 0.75 - sh * 0.75))
             self.mess_surface.set_alpha(150)
             window.blit(self.mess_surface, (w / 2 - mw / 2, h / 2 - mh / 2))
+
+    def message_timer(self, counter):
+        Timer(0.2, self.message_switch, [counter]).start()
+
+        # Timer(2, self.message_switch).start()
+        # Timer(2, self.message_switch).start()
+
+    def message_switch(self, counter):
+        counter -= 1
+        if counter < 0:
+            self.messgo = False
+            return
+        if self.firstxt:
+            self.firstxt = False
+            self.secondtxt = True
+            self.message_timer(counter)
+        elif self.secondtxt:
+            self.secondtxt = False
+            self.thirdtxt = True
+            self.message_timer(counter)
+        elif self.thirdtxt:
+            self.thirdtxt = False
+            self.firstxt = True
+            self.message_timer(counter)
+
 
     def score_card(self):
         lives_write = str(self.lives)
@@ -347,7 +377,8 @@ def main():
             
         Gvar.score_card()
 
-        Gvar.show_message()
+        if Gvar.level == 3:
+            Gvar.show_message()
 
         pygame.display.update()
 
