@@ -27,3 +27,4 @@ So far, it seems like all of my code is spaghetti, but it works.
 * Give pop sound to enemies when hit
 * Fill in pause screen
 * Make a start screen
+* Make a game end screen
