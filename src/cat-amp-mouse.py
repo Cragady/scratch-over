@@ -50,6 +50,8 @@ class game_vars:
         self.firing = True
         self.keys = {}
         self.game_loop = True
+        self.music = True
+        self.once = True
         self.messgo = True
         self.first_time = True
         self.firstxt = True
@@ -293,7 +295,32 @@ class Sprite:
     def shoot_timer(self):
         self.shooting = True
 
+
+def play_music(sarr):
+    if Gvar.music:
+        Gvar.music = False
+        if sarr == 0:
+            pygame.mixer.music.load(muse_arr[sarr])
+            pygame.mixer.music.play(-1)
+            pygame.mixer.music.queue(muse_arr[2])
+        else:
+            pygame.mixer.music.load(muse_arr[2])
+            pygame.mixer.Channel(1).play(pygame.mixer.Sound(muse_arr[1]))
+            Timer(2.873, pygame.mixer.music.play, [-1]).start()
+
+def once_only():
+    if Gvar.once == True:
+        pygame.mixer.music.stop()
+        Gvar.once = False
+        Gvar.music = True
+
 #Knitting more game vars
+muse_arr = [
+        pather('../assets/08 Looping Steps.mp3'),
+        pather('../assets/Intro.wav'),
+        pather('../assets/06 Slider.mp3')
+        ]
+
 Gvar = game_vars()
 
 #Set Player Sprite
@@ -314,10 +341,20 @@ for enemiess in range(number_of_enemies):
     enem_lis.append(Sprite('enemy', pather('../assets/bmouse.png'), 0.12, [random.randint(0, w), random.randint(-1200, -20)], [50, 65]))
 
 def main():
-
+    # Timer(0.1, play_music,[1]).start()
     while Gvar.game_loop:
         if Gvar.lives < 0:
                 Gvar.game_loop = False
+
+            
+        if Gvar.level < 4:
+            if pygame.mixer.music.get_busy() == False:
+                play_music(0)
+        else:
+            once_only()
+            if pygame.mixer.music.get_busy() == False:
+                play_music(1)
+        
                 
         window.blit(background_image, [0, 0])
 
