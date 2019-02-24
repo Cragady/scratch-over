@@ -21,7 +21,9 @@ So far, it seems like all of my code is spaghetti, but it works.
 
 # Later Things
 
-## Player
+## To Do 2
 
 * Meow sound on game over
-* Glide to center on new game
+* Give pop sound to enemies when hit
+* Fill in pause screen
+* Make a start screen
