@@ -9,10 +9,6 @@ window = pygame.display.set_mode((600, 500))
 
 pygame.display.set_caption('Cat & Mouse')
 
-#Set Text Pt.1
-myfont = pygame.font.SysFont('Arial', 20)
-text_surface = pygame.Surface((100, 75))
-
 #Pathers
 dirname = os.path.dirname(__file__)
 def pather(file):
@@ -25,34 +21,45 @@ background_image = pygame.transform.scale(background_image, (w, h))
 
 class game_vars:
         #Enemy Costumes
-    costumes = [
-        {
-            'img': 'bmouse.png',
-            'size': [40, 65]
-        },
-        {
-            'img': 'b-c.png',
-            'size': [40, 65]
-        },
-        {
-            'img': 'b-a.png',
-            'size': [40, 65]
-        },
-        {
-            'img': 'b-t.png',
-            'size': [40,65]
-        }
-    ]
+    def __init__(self):
+        self.costumes = [
+            {
+                'img': 'bmouse.png',
+                'size': [40, 65]
+            },
+            {
+                'img': 'b-c.png',
+                'size': [40, 65]
+            },
+            {
+                'img': 'b-a.png',
+                'size': [40, 65]
+            },
+            {
+                'img': 'b-t.png',
+                'size': [40,65]
+            }
+        ]
 
-    #Game Vars
-    level = 1
-    score = 0
-    lives = 10
-    speed_enem = 1
-    speed_all = 1 
-    firing = True
-    keys = {}
-    game_loop = True
+        #Game Vars
+        self.level = 1
+        self.score = 0
+        self.lives = 10
+        self.speed_enem = 1
+        self.speed_all = 1 
+        self.firing = True
+        self.keys = {}
+        self.game_loop = True
+        self.messgo = True
+        self.firstxt = True
+        self.secondtxt = False
+        self.thirdtxt = False
+        self.messcolor = [0, 0, 0]
+        self.messfont = pygame.font.SysFont('Arial', 30)
+        self.mess_surface = pygame.Surface((300, 100))
+        self.myfont = pygame.font.SysFont('Arial', 20)
+        self.text_surface = pygame.Surface((100,75))
+
 
     #Score Watching
     def score_watcher(self, sc):
@@ -65,11 +72,49 @@ class game_vars:
         elif sc >= 50:
             return 4
 
+    def show_message(self):
+        if self.messgo:
+            #1white col = 255, 255, 255
+            #2Pink col = 255, 153, 229
+            #3blue col = 0, 255, 255
+            if self.firstxt:
+                self.messcolor = [255, 255, 255]
+            elif self.secondtxt:
+                self.messcolor = [255, 153, 229]
+            elif self.thirdtxt:
+                self.messcolor = [0, 255, 255]
+            message = self.messfont.render('Automatic Fire Mode', False, self.messcolor)
+            spaceage = self.messfont.render('(Hold Spacebar)', False, self.messcolor)
+            tw, th = message.get_rect().size
+            sw, sh = spaceage.get_rect().size
+            mw, mh = self.mess_surface.get_rect().size
+            
+            
+            self.mess_surface.fill((0, 0, 0))
+            self.mess_surface.blit(message, (mw / 2 - tw / 2, mh * 0.25 - th * 0.25))
+            self.mess_surface.blit(spaceage, (mw * 0.5 - sw * 0.5, mh * 0.75 - sh * 0.75))
+            self.mess_surface.set_alpha(150)
+            window.blit(self.mess_surface, (w / 2 - mw / 2, h / 2 - mh / 2))
+
+    def score_card(self):
+        lives_write = str(self.lives)
+        if self.lives < 0:
+            lives_write = 0
+        scoresurface = self.myfont.render(f'Score: {str(self.score)}', False, (0, 0, 0))
+        livessurface = self.myfont.render(f'Lives: {str(lives_write)}', False, (0, 0, 0))
+        levelsurface = self.myfont.render(f'Level: {str(self.level)}', False, (0, 0, 0))
+        self.text_surface.fill((255, 255, 255))
+        self.text_surface.blit(scoresurface, (0, 0))
+        self.text_surface.blit(livessurface, (0, 20))
+        self.text_surface.blit(levelsurface, (0, 40))
+        self.text_surface.set_alpha(200)
+        window.blit(self.text_surface, (0, 0))
+
     def speed_watcher(self, sall, enem):
         if sall:
             return len(bullets) * 0.06 + 1
         else: 
-            if Gvar.level < 3:
+            if Gvar.level < 4:
                 return len(bullets) * 0.06 + 1
             else: 
                 return len(bullets) * 0.06 + 3
@@ -167,7 +212,7 @@ class Sprite:
         #Set diff collisions for the fly-cat
         if self.stype == 'bullet':
             bullpop = bullets.index(self)
-            if (self.pos[1] or self.pos[0]) < 0 or self.pos[0] > w - self.width:
+            if self.pos[1] < 0 or self.pos[0] < 0 or self.pos[0] > w - self.width:
                 pre_bullets.append(bullets.pop(bullpop))
         elif self.stype == 'enemy' or 'player' or 'dropcat':
         # if self.stype == 'enemy' or 'player' or 'dropcat':
@@ -195,7 +240,7 @@ class Sprite:
 
     def array_mover(self):
         if len(pre_bullets) > 0:
-            pre_bullets[0].pos = [self.ccor[0], self.ccor[1]]
+            pre_bullets[0].pos = [self.pos[0] + self.width * 0.3, self.pos[1] - self.height * 0.3]
             bullets.append(pre_bullets.pop(0))
 
     def shooter(self, press, hold, lvl):
@@ -220,14 +265,17 @@ class Sprite:
 
 #Knitting more game vars
 Gvar = game_vars()
+
 #Set Player Sprite
 Player = Sprite('player', pather('../assets/player.png'), 0.4, [w / 2, h - 40], [60, 45])
+
 #Set Bullets
 number_of_bullets = 50
 bullets = []
 pre_bullets = []
 for bulletss in range(number_of_bullets):
-    pre_bullets.append(Sprite('bullet', pather('../assets/bweb2.png'), 0.35, [Player.ccor[0], Player.ccor[1] + 5], [25, 25]))
+    pre_bullets.append(Sprite('bullet', pather('../assets/bweb2.png'), 0.35, [-30, -30], [25, 25]))
+
 #Set Enemies
 number_of_enemies = 15
 enem_lis = []
@@ -240,12 +288,8 @@ def main():
     while Gvar.game_loop:
         if Gvar.lives < 0:
                 Gvar.game_loop = False
-        # speedwatcher = 1
+                
         window.blit(background_image, [0, 0])
-        #The below is for sizing and resizing purposes //if I get to it that is
-        # pygame.draw.rect(window, (200, 0, 0), (window.get_width()/3, 
-        #     window.get_height()/3, window.get_width()/3,
-        #     window.get_height()/3))
 
         #Events
         for event in pygame.event.get():
@@ -300,23 +344,11 @@ def main():
                 if Enemies.check_collision(Bullet):
                     Gvar.score += 1
             Enemies.movement(False, False, True, False, Gvar.speed_watcher(False, True))
-        
-        #Setting Text
-        lives_write = str(Gvar.lives)
-        if Gvar.lives < 0:
-            lives_write = 0
-        scoresurface = myfont.render(f'Score: {str(Gvar.score)}', False, (0, 0, 0))
-        livessurface = myfont.render(f'Lives: {str(lives_write)}', False, (0, 0, 0))
-        levelsurface = myfont.render(f'Level: {str(Gvar.level)}', False, (0, 0, 0))
-        text_surface.fill((255, 255, 255))
-        text_surface.blit(scoresurface, (0, 0))
-        text_surface.blit(livessurface, (0, 20))
-        text_surface.blit(levelsurface, (0, 40))
-        text_surface.set_alpha(200)
-        window.blit(text_surface, (0, 0))
-        # window.blit(scoresurface, (0, 0))
+            
+        Gvar.score_card()
 
-        #Update Portions of screen
+        Gvar.show_message()
+
         pygame.display.update()
 
 main()
