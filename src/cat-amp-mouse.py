@@ -183,6 +183,7 @@ class Sprite:
         self.drop_spawn = True
         self.pupspawn = False
         self.pup_down = True
+        self.fly_by = True
         self.ccor = [0, 1]
         self.shooting = True
         self.shot = False
@@ -254,6 +255,7 @@ class Sprite:
             self.check_collision(False)
             window.blit(self.sprite, (self.pos[0], self.pos[1]))
         if self.stype == 'fly':
+            self.check_collision(False)
             window.blit(self.sprite, (self.pos[0], self.pos[1]))
 
 
@@ -265,11 +267,11 @@ class Sprite:
                 pre_bullets.append(bullets.pop(bullpop))
         elif self.stype != 'bullet':
             if self.pos[0] < 0:
-                if(self.stype == 'pup'):
+                if self.stype == 'pup':
                     self.speed *= -1
                 self.pos[0] = 0
             elif self.pos[0] > w - self.width:
-                if(self.stype == 'pup'):
+                if self.stype == 'pup':
                     self.speed *= -1
                 self.pos[0] = w - self.width
 
@@ -285,6 +287,11 @@ class Sprite:
                     return True
                 elif self.stype == 'drop': 
                     self.pos = [random.randint(0, w), random.randint(-800, -20)]
+                    return True
+                elif self.stype == 'fly':
+                    if t1.stype == 'bullet':
+                        bullp2 = bullets.index(t1)
+                        pre_bullets.append(bullets.pop(bullp2))
                     return True
 
     def set_costumes(self):
@@ -345,14 +352,24 @@ class Sprite:
             ender = end - self.dstart
             if self.end_point - 1 < ender < self.end_point:
                 self.quit = True
-                drop_cat.append(drop_wait.pop())
+                if len(drop_wait) > 0:
+                    drop_cat.append(drop_wait.pop())
                 self.drop_spawn = True
 
     def spawn_fly(self, end):
-        # if self.fly_by == undefined:
-        #     print('unde')
-        if len(fly_wait) > 0:
-            fly_cat.append(fly_wait.pop())
+        if self.fly_by == True:
+            self.fstart = time.time()
+            self.fly_by = False
+            self.fly_ex = True
+            self.fly_end = random.randint(7, 15)
+        ender = end - self.fstart
+        if self.fly_end -1 <  ender < self.fly_end:
+            if len(fly_wait) > 0:
+                self.fly_by = True
+                self.fly_ex = False
+                fly_cat.append(fly_wait.pop())
+        elif self.fly_ex == True:
+            return
 
 
 def play_music(sarr):
@@ -403,7 +420,7 @@ for pupss in range(num_pups):
     pup_wait.append(Sprite('pup', pather('./assets/drop-cat.png'), 0.6, [-140, -140], [60, 45]))
 
 fly_cat = []
-fly_wait = [Sprite('fly', pather('./assets/fly-cat.png'), 0.4, [180, 180], [100, 75])]
+fly_wait = [Sprite('fly', pather('./assets/fly-cat.png'), 0.1, [180, 180], [100, 75])]
 
 #Set Enemies
 number_of_enemies = 15
@@ -488,6 +505,10 @@ def main():
             
         for Fly in fly_cat:
             Fly.handle_spawn()
+            for Bullet in bullets:
+                if Fly.check_collision(Bullet):
+                    print('hit the fly cat!')
+            Fly.movement(False, True, False, False, Gvar.speed_watcher(False, True))
 
         for Pup in pups:
             Pup.handle_spawn()
