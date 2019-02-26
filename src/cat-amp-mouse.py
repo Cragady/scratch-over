@@ -292,6 +292,7 @@ class Sprite:
                     if t1.stype == 'bullet':
                         bullp2 = bullets.index(t1)
                         pre_bullets.append(bullets.pop(bullp2))
+                    fly_wait.append(fly_cat.pop())
                     return True
 
     def set_costumes(self):
@@ -357,7 +358,7 @@ class Sprite:
                 self.drop_spawn = True
 
     def spawn_fly(self, end):
-        if self.fly_by == True:
+        if self.fly_by == True and len(fly_wait) > 0:
             self.fstart = time.time()
             self.fly_by = False
             self.fly_ex = True
@@ -365,8 +366,8 @@ class Sprite:
         ender = end - self.fstart
         if self.fly_end -1 <  ender < self.fly_end:
             if len(fly_wait) > 0:
-                self.fly_by = True
                 self.fly_ex = False
+                self.fly_by = True
                 fly_cat.append(fly_wait.pop())
         elif self.fly_ex == True:
             return
@@ -507,7 +508,9 @@ def main():
             Fly.handle_spawn()
             for Bullet in bullets:
                 if Fly.check_collision(Bullet):
-                    print('hit the fly cat!')
+                    Gvar.lives += 1
+                    # If level > 3:
+                    #   broadcast(killed_kitteh_sad_face)
             Fly.movement(False, True, False, False, Gvar.speed_watcher(False, True))
 
         for Pup in pups:
