@@ -11,12 +11,20 @@ pygame.display.set_caption('Cat & Mouse')
 
 #Pathers
 dirname = os.path.dirname(__file__)
-def pather(file):
-    return os.path.join(dirname, file)
+print(dirname)
+if dirname == 'src':
+    def pather(file):
+        file = '.' + file
+        return os.path.join(dirname, file)
+else:
+    def pather(file):
+        return os.path.join(dirname, file)
+
+    
 
 #Grabbers
 w, h = pygame.display.get_surface().get_size()
-background_image = pygame.image.load(pather('../assets/neon-tun-back.png')).convert()
+background_image = pygame.image.load(pather('./assets/neon-tun-back.png')).convert()
 background_image = pygame.transform.scale(background_image, (w, h))
 
 
@@ -283,7 +291,7 @@ class Sprite:
     def set_costumes(self):
         if self.pos[1] < 0 and Gvar.level > 3:
             new_cos = Gvar.costumes[random.randint(0, 3)]
-            self.image = pather(f'../assets/{new_cos["img"]}')
+            self.image = pather(f'./assets/{new_cos["img"]}')
             self.size = new_cos['size']
             self.second_init(self.stype, self.image, self.speed, self.posIn, self.size)
 
@@ -296,13 +304,13 @@ class Sprite:
         if self.shooting == False or self.shot == True:
             return
         if press:
-            # bullets.append(Sprite('bullet', pather('../assets/bweb2.png'), 0.5, [Player.ccor[0], Player.ccor[1] + 5], [25, 25]))
+            # bullets.append(Sprite('bullet', pather('./assets/bweb2.png'), 0.5, [Player.ccor[0], Player.ccor[1] + 5], [25, 25]))
             self.array_mover()
             self.shooting = False
             self.shot = True
             Timer(0.1, self.shoot_timer).start()
         elif hold: 
-            # bullets.append(Sprite('bullet', pather('../assets/bweb2.png'), 0.5, [Player.ccor[0], Player.ccor[1] + 5], [25, 25]))
+            # bullets.append(Sprite('bullet', pather('./assets/bweb2.png'), 0.5, [Player.ccor[0], Player.ccor[1] + 5], [25, 25]))
             self.array_mover()
             self.shooting = False
             Timer(0.05, self.shoot_timer).start()
@@ -367,42 +375,42 @@ def once_only():
 
 #Knitting more game vars
 muse_arr = [
-    pather('../assets/08 Looping Steps.mp3'),
-    pather('../assets/Intro.wav'),
-    pather('../assets/06 Slider.mp3')
+    pather('./assets/08 Looping Steps.mp3'),
+    pather('./assets/Intro.wav'),
+    pather('./assets/06 Slider.mp3')
     ]
 
 pygame.mixer.init()
 Gvar = game_vars()
 
 #Set Player Sprite
-Player = Sprite('player', pather('../assets/player.png'), 0.4, [w / 2, h - 40], [60, 45])
+Player = Sprite('player', pather('./assets/player.png'), 0.4, [w / 2, h - 40], [60, 45])
 
 #Set Bullets
 number_of_bullets = 50
 bullets = []
 pre_bullets = []
 for bulletss in range(number_of_bullets):
-    pre_bullets.append(Sprite('bullet', pather('../assets/bweb2.png'), 0.35, [-30, -30], [25, 25]))
+    pre_bullets.append(Sprite('bullet', pather('./assets/bweb2.png'), 0.35, [-30, -30], [25, 25]))
 
 #Power Up
 num_pups = 2
 pups = []
 pup_wait = []
 drop_cat = []
-drop_wait = [Sprite('drop', pather('../assets/drop-cat.png'), 0.12, [140, 140], [60, 45])]
+drop_wait = [Sprite('drop', pather('./assets/drop-cat.png'), 0.12, [140, 140], [60, 45])]
 for pupss in range(num_pups):
-    pup_wait.append(Sprite('pup', pather('../assets/drop-cat.png'), 0.6, [140, 140], [60, 45]))
+    pup_wait.append(Sprite('pup', pather('./assets/drop-cat.png'), 0.6, [random.randint(0, w), random.randint(-1200, -20)], [60, 45]))
 
 fly_cat = []
-fly_wait = [Sprite('fly', pather('../assets/fly-cat.png'), 0.4, [180, 180], [100, 75])]
+fly_wait = [Sprite('fly', pather('./assets/fly-cat.png'), 0.4, [180, 180], [100, 75])]
 
 #Set Enemies
 number_of_enemies = 15
 enem_lis = []
 temp_enem = []
 for enemiess in range(number_of_enemies):
-    enem_lis.append(Sprite('enemy', pather('../assets/bmouse.png'), 0.12, [random.randint(0, w), random.randint(-1200, -20)], [50, 65]))
+    enem_lis.append(Sprite('enemy', pather('./assets/bmouse.png'), 0.12, [random.randint(0, w), random.randint(-1200, -20)], [50, 65]))
 
 def main():
     while Gvar.game_loop:
@@ -502,3 +510,4 @@ def main():
         pygame.display.update()
 
 main()
+input('press enter pls')
