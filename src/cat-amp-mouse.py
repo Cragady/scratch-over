@@ -11,7 +11,6 @@ pygame.display.set_caption('Cat & Mouse')
 
 #Pathers
 dirname = os.path.dirname(__file__)
-print(dirname)
 if dirname == 'src':
     def pather(file):
         file = '.' + file
@@ -346,13 +345,14 @@ class Sprite:
             ender = end - self.dstart
             if self.end_point - 1 < ender < self.end_point:
                 self.quit = True
-                self.dropper()
+                drop_cat.append(drop_wait.pop())
+                self.drop_spawn = True
 
-    def dropper(self):
-        if len(drop_wait) > 0:
-            drop_cat.append(drop_wait.pop())
-            self.drop_spawn = True
-
+    def spawn_fly(self, end):
+        # if self.fly_by == undefined:
+        #     print('unde')
+        if len(fly_wait) > 0:
+            fly_cat.append(fly_wait.pop())
 
 
 def play_music(sarr):
@@ -398,9 +398,9 @@ num_pups = 2
 pups = []
 pup_wait = []
 drop_cat = []
-drop_wait = [Sprite('drop', pather('./assets/drop-cat.png'), 0.12, [140, 140], [60, 45])]
+drop_wait = [Sprite('drop', pather('./assets/drop-cat.png'), 0.12, [random.randint(0, w), random.randint(-1200, -20)], [60, 45])]
 for pupss in range(num_pups):
-    pup_wait.append(Sprite('pup', pather('./assets/drop-cat.png'), 0.6, [random.randint(0, w), random.randint(-1200, -20)], [60, 45]))
+    pup_wait.append(Sprite('pup', pather('./assets/drop-cat.png'), 0.6, [-140, -140], [60, 45]))
 
 fly_cat = []
 fly_wait = [Sprite('fly', pather('./assets/fly-cat.png'), 0.4, [180, 180], [100, 75])]
@@ -466,9 +466,10 @@ def main():
 
         #Keys/Collision listeners
         Player.handle_spawn()
-        if Gvar.level > 1:
+        if Gvar.level > 0:
             end = time.time()
             Player.spawn_drop(end)
+            Player.spawn_fly(end)
         Player.movement(Gvar.keys.get('key_left', False), Gvar.keys.get('key_right', False), False, False, Gvar.speed_watcher(True, False))
         if Gvar.level < 3:
             Player.shooter(Gvar.keys.get('key_space'), False, Gvar.level)
@@ -485,7 +486,7 @@ def main():
                 Player.spawn_pups()
             Drop.movement(False, False, True, False, Gvar.speed_watcher(False, True))
             
-        for Fly in fly_wait:
+        for Fly in fly_cat:
             Fly.handle_spawn()
 
         for Pup in pups:
@@ -510,4 +511,3 @@ def main():
         pygame.display.update()
 
 main()
-input('press enter pls')
