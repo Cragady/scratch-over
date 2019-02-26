@@ -19,6 +19,7 @@ w, h = pygame.display.get_surface().get_size()
 background_image = pygame.image.load(pather('../assets/neon-tun-back.png')).convert()
 background_image = pygame.transform.scale(background_image, (w, h))
 
+
 class game_vars:
         #Enemy Costumes
     def __init__(self):
@@ -77,12 +78,8 @@ class game_vars:
 
     def show_message(self):
         if self.messgo:
-            #1white col = 255, 255, 255
-            #2Pink col = 255, 153, 229
-            #3blue col = 0, 255, 255
             if self.first_time:
                 self.first_time = False
-                # self.message_timer()
                 Timer(0.2, self.message_timer, [20]).start()
             if self.firstxt:
                 self.messcolor = [255, 255, 255]
@@ -105,9 +102,6 @@ class game_vars:
 
     def message_timer(self, counter):
         Timer(0.2, self.message_switch, [counter]).start()
-
-        # Timer(2, self.message_switch).start()
-        # Timer(2, self.message_switch).start()
 
     def message_switch(self, counter):
         counter -= 1
@@ -144,12 +138,12 @@ class game_vars:
 
     def speed_watcher(self, sall, enem):
         if sall:
-            return len(bullets) * 0.06 + 1
+            return len(bullets) * 0.06 + len(pups) * 0.1 + 1
         else: 
             if Gvar.level < 4:
-                return len(bullets) * 0.06 + 1
+                return len(bullets) * 0.06 + len(pups) * 0.06 + 1
             else: 
-                return len(bullets) * 0.06 + 3
+                return len(bullets) * 0.06 + len(pups) * 0.06 + 3
                 
     def pause(self, pauser):
         while pauser == True:
@@ -179,6 +173,9 @@ class Sprite:
         self.speed = speed
         self.origspeed = speed
         self.posIn = posIn
+        self.drop_spawn = True
+        self.pupspawn = False
+        self.pup_down = True
         self.ccor = [0, 1]
         self.shooting = True
         self.shot = False
@@ -218,6 +215,8 @@ class Sprite:
             self.pos[0] += self.speed * spe_schange
             if self.pos[0] > w - self.width:
                 self.pos[0] = w - self.width
+                if self.stype == 'pup':
+                    self.speed *= -1
         elif ddir:
             self.pos[1] += self.speed * spe_schange
             if self.pos[1] > h:
@@ -225,6 +224,9 @@ class Sprite:
                     self.set_costumes()
                     self.pos = [random.randint(0, w), random.randint(-800, -20)]
                     Gvar.lives -= 1
+                elif self.stype == 'drop':
+                    self.pos = [random.randint(0, w), random.randint(-800, -20)]
+                    drop_wait.append(drop_cat.pop())
         elif udir:
             self.pos[1] -= self.speed * spe_schange
 
@@ -238,6 +240,14 @@ class Sprite:
         if self.stype == 'bullet':
             self.check_collision(False)
             window.blit(self.sprite, (self.pos[0], self.pos[1]))
+        if self.stype == 'drop':
+            self.check_collision(False)
+            window.blit(self.sprite, (self.pos[0], self.pos[1]))
+        if self.stype == 'pup':
+            self.check_collision(False)
+            window.blit(self.sprite, (self.pos[0], self.pos[1]))
+        if self.stype == 'fly':
+            window.blit(self.sprite, (self.pos[0], self.pos[1]))
 
 
     def check_collision(self, t1):
@@ -246,20 +256,27 @@ class Sprite:
             bullpop = bullets.index(self)
             if self.pos[1] < 0 or self.pos[0] < 0 or self.pos[0] > w - self.width:
                 pre_bullets.append(bullets.pop(bullpop))
-        elif self.stype == 'enemy' or 'player' or 'dropcat':
-        # if self.stype == 'enemy' or 'player' or 'dropcat':
+        elif self.stype != 'bullet':
             if self.pos[0] < 0:
+                if(self.stype == 'pup'):
+                    self.speed *= -1
                 self.pos[0] = 0
             elif self.pos[0] > w - self.width:
+                if(self.stype == 'pup'):
+                    self.speed *= -1
                 self.pos[0] = w - self.width
 
         if t1 != False:
             distance = math.sqrt(math.pow(self.ccor[0] - t1.ccor[0], 2) + math.pow(self.ccor[1] - t1.ccor[1], 2))
             if distance < 35:
-                if(self.stype == 'enemy'):
-                    bullpop = bullets.index(t1)
-                    pre_bullets.append(bullets.pop(bullpop))
+                if self.stype == 'enemy':
+                    if t1.stype == 'bullet':
+                        bullpop = bullets.index(t1)
+                        pre_bullets.append(bullets.pop(bullpop))
                     self.set_costumes()
+                    self.pos = [random.randint(0, w), random.randint(-800, -20)]
+                    return True
+                elif self.stype == 'drop': 
                     self.pos = [random.randint(0, w), random.randint(-800, -20)]
                     return True
 
@@ -295,6 +312,40 @@ class Sprite:
     def shoot_timer(self):
         self.shooting = True
 
+    def spawn_pups(self):
+        self.pupspawn = True
+        for pup in range(num_pups):
+            pups.append(pup_wait[pup])
+        pups[0].pos = [0, self.pos[1]]
+        pups[1].pos = [w, self.pos[1]]
+
+    def spawn_drop(self, end):
+        if self.pupspawn: 
+            if self.pup_down:
+                self.pup_down = False
+                self.down_start = time.time()
+            if 10 - 1 < end - self.down_start < 10:
+                self.pup_down = True
+                self.pupspawn = False
+                self.drop_spawn = True
+                for pup in range(num_pups):
+                    pups.pop()
+        else:
+            if self.drop_spawn:
+                self.drop_spawn = False
+                self.dstart = time.time()
+                self.end_point = random.randint(10, 13)
+            ender = end - self.dstart
+            if self.end_point - 1 < ender < self.end_point:
+                self.quit = True
+                self.dropper()
+
+    def dropper(self):
+        if len(drop_wait) > 0:
+            drop_cat.append(drop_wait.pop())
+            self.drop_spawn = True
+
+
 
 def play_music(sarr):
     if Gvar.music:
@@ -316,11 +367,12 @@ def once_only():
 
 #Knitting more game vars
 muse_arr = [
-        pather('../assets/08 Looping Steps.mp3'),
-        pather('../assets/Intro.wav'),
-        pather('../assets/06 Slider.mp3')
-        ]
+    pather('../assets/08 Looping Steps.mp3'),
+    pather('../assets/Intro.wav'),
+    pather('../assets/06 Slider.mp3')
+    ]
 
+pygame.mixer.init()
 Gvar = game_vars()
 
 #Set Player Sprite
@@ -333,6 +385,18 @@ pre_bullets = []
 for bulletss in range(number_of_bullets):
     pre_bullets.append(Sprite('bullet', pather('../assets/bweb2.png'), 0.35, [-30, -30], [25, 25]))
 
+#Power Up
+num_pups = 2
+pups = []
+pup_wait = []
+drop_cat = []
+drop_wait = [Sprite('drop', pather('../assets/drop-cat.png'), 0.12, [140, 140], [60, 45])]
+for pupss in range(num_pups):
+    pup_wait.append(Sprite('pup', pather('../assets/drop-cat.png'), 0.6, [140, 140], [60, 45]))
+
+fly_cat = []
+fly_wait = [Sprite('fly', pather('../assets/fly-cat.png'), 0.4, [180, 180], [100, 75])]
+
 #Set Enemies
 number_of_enemies = 15
 enem_lis = []
@@ -341,9 +405,8 @@ for enemiess in range(number_of_enemies):
     enem_lis.append(Sprite('enemy', pather('../assets/bmouse.png'), 0.12, [random.randint(0, w), random.randint(-1200, -20)], [50, 65]))
 
 def main():
-    # Timer(0.1, play_music,[1]).start()
     while Gvar.game_loop:
-        if Gvar.lives < 0:
+        if Gvar.lives < -300000:
                 Gvar.game_loop = False
 
             
@@ -361,6 +424,7 @@ def main():
         #Events
         for event in pygame.event.get():
             if (event.type == pygame.QUIT):
+                Player.quit = True
                 pygame.quit()
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
@@ -394,15 +458,31 @@ def main():
 
         #Keys/Collision listeners
         Player.handle_spawn()
+        if Gvar.level > 1:
+            end = time.time()
+            Player.spawn_drop(end)
         Player.movement(Gvar.keys.get('key_left', False), Gvar.keys.get('key_right', False), False, False, Gvar.speed_watcher(True, False))
         if Gvar.level < 3:
             Player.shooter(Gvar.keys.get('key_space'), False, Gvar.level)
         else: 
             Player.shooter(False, Gvar.keys.get('key_space'), Gvar.level)
-        # Player.shooter(Gvar.keys.get('key_space'), Gvar.keys.get('space_press'))
         for Bullet in bullets:
             Bullet.handle_spawn()
             Bullet.movement(False, False, False, True, Gvar.speed_watcher(True, False))
+
+        for Drop in drop_cat:
+            Drop.handle_spawn()
+            if Drop.check_collision(Player):
+                drop_wait.append(drop_cat.pop())
+                Player.spawn_pups()
+            Drop.movement(False, False, True, False, Gvar.speed_watcher(False, True))
+            
+        for Fly in fly_wait:
+            Fly.handle_spawn()
+
+        for Pup in pups:
+            Pup.handle_spawn()
+            Pup.movement(False, True, False, False, Gvar.speed_watcher(False, True))
 
         for Enemies in enem_lis:
             # Enemies.check_collision(Bullet) #This may be different
@@ -410,6 +490,8 @@ def main():
             for Bullet in bullets:
                 if Enemies.check_collision(Bullet):
                     Gvar.score += 1
+            for Pup in pups:
+                Enemies.check_collision(Pup)
             Enemies.movement(False, False, True, False, Gvar.speed_watcher(False, True))
             
         Gvar.score_card()
