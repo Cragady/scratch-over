@@ -225,6 +225,9 @@ class Sprite:
                 self.pos[0] = w - self.width
                 if self.stype == 'pup':
                     self.speed *= -1
+                if self.stype == 'fly':
+                    self.pos = [0, 80]
+                    fly_wait.append(fly_cat.pop())
         elif ddir:
             self.pos[1] += self.speed * spe_schange
             if self.pos[1] > h:
@@ -292,6 +295,7 @@ class Sprite:
                     if t1.stype == 'bullet':
                         bullp2 = bullets.index(t1)
                         pre_bullets.append(bullets.pop(bullp2))
+                    self.pos = [0, 80]
                     fly_wait.append(fly_cat.pop())
                     return True
 
@@ -421,7 +425,7 @@ for pupss in range(num_pups):
     pup_wait.append(Sprite('pup', pather('./assets/drop-cat.png'), 0.6, [-140, -140], [60, 45]))
 
 fly_cat = []
-fly_wait = [Sprite('fly', pather('./assets/fly-cat.png'), 0.1, [180, 180], [100, 75])]
+fly_wait = [Sprite('fly', pather('./assets/fly-cat.png'), 0.5, [0, 80], [100, 75])]
 
 #Set Enemies
 number_of_enemies = 15
@@ -511,7 +515,7 @@ def main():
                     Gvar.lives += 1
                     # If level > 3:
                     #   broadcast(killed_kitteh_sad_face)
-            Fly.movement(False, True, False, False, Gvar.speed_watcher(False, True))
+            Fly.movement(False, True, False, False, Gvar.speed_watcher(True, False))
 
         for Pup in pups:
             Pup.handle_spawn()
