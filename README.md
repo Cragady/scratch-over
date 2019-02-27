@@ -11,17 +11,15 @@ A week or two ago (Date today is 2/22/19), I decided to learn a little bit of Py
 So far, it seems like all of my code is spaghetti, but it works.
 
 # To Do
-* Lvl 1: fly-cat, here it adds extra life
-* Do same thing with fly-cat as drop-cat
-* @ Lvl 4: fly-cat adds extra shooting too
-* Will prolly have triple shooting by blitting three webs at a time, then adding positive and negative speeds on the y axis on the corresponding webs that should shoot to the sides
+* Add side collision for triple shooting
+* Add deactivation timer for triple shooting
 
 # Later Things
 
 ## To Do 2
 
+* Clean/Organize
 * Meow sound on game over
-* Give pop sound to enemies when hit
 * Fill in pause screen
 * Make a start screen
 * Make a game end screen

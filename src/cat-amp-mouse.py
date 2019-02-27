@@ -184,6 +184,8 @@ class Sprite:
         self.pupspawn = False
         self.pup_down = True
         self.fly_by = True
+        self.triple_shoot = False
+        self.bull_place = 0
         self.ccor = [0, 1]
         self.shooting = True
         self.shot = False
@@ -309,6 +311,10 @@ class Sprite:
     def array_mover(self):
         if len(pre_bullets) > 0:
             pre_bullets[0].pos = [self.pos[0] + self.width * 0.3, self.pos[1] - self.height * 0.3]
+            self.bull_place += 1
+            if self.bull_place == 3:
+                self.bull_place = 0
+            pre_bullets[0].bull_place = self.bull_place
             bullets.append(pre_bullets.pop(0))
 
     def shooter(self, press, hold, lvl):
@@ -324,7 +330,10 @@ class Sprite:
             # bullets.append(Sprite('bullet', pather('./assets/bweb2.png'), 0.5, [Player.ccor[0], Player.ccor[1] + 5], [25, 25]))
             self.array_mover()
             self.shooting = False
-            Timer(0.05, self.shoot_timer).start()
+            if self.triple_shoot:
+                Timer(0.015, self.shoot_timer).start()
+            else:
+                Timer(0.05, self.shoot_timer).start()
         else:
             return
 
@@ -425,7 +434,7 @@ for pupss in range(num_pups):
     pup_wait.append(Sprite('pup', pather('./assets/drop-cat.png'), 0.6, [-140, -140], [60, 45]))
 
 fly_cat = []
-fly_wait = [Sprite('fly', pather('./assets/fly-cat.png'), 0.5, [0, 80], [100, 75])]
+fly_wait = [Sprite('fly', pather('./assets/fly-cat.png'), 0.3, [0, 80], [100, 75])]
 
 #Set Enemies
 number_of_enemies = 15
@@ -493,12 +502,20 @@ def main():
             Player.spawn_drop(end)
             Player.spawn_fly(end)
         Player.movement(Gvar.keys.get('key_left', False), Gvar.keys.get('key_right', False), False, False, Gvar.speed_watcher(True, False))
-        if Gvar.level < 3:
+        if Gvar.level < 0:
             Player.shooter(Gvar.keys.get('key_space'), False, Gvar.level)
         else: 
             Player.shooter(False, Gvar.keys.get('key_space'), Gvar.level)
         for Bullet in bullets:
             Bullet.handle_spawn()
+            if Player.triple_shoot and len(bullets) > 0:
+                bulli = Bullet.bull_place
+                if bulli == 1:
+                    Bullet.movement(True, False, False, True, Gvar.speed_watcher(True, False))
+                elif bulli == 2:
+                    Bullet.movement(False, True, False, True, Gvar.speed_watcher(True, False))
+                elif bulli == 3:
+                    Bullet.movement(False, False, False, True, Gvar.speed_watcher(True, False))
             Bullet.movement(False, False, False, True, Gvar.speed_watcher(True, False))
 
         for Drop in drop_cat:
@@ -513,8 +530,8 @@ def main():
             for Bullet in bullets:
                 if Fly.check_collision(Bullet):
                     Gvar.lives += 1
-                    # If level > 3:
-                    #   broadcast(killed_kitteh_sad_face)
+                    if Gvar.level > 3:
+                      Player.triple_shoot = True
             Fly.movement(False, True, False, False, Gvar.speed_watcher(True, False))
 
         for Pup in pups:
