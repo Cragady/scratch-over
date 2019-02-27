@@ -184,7 +184,9 @@ class Sprite:
         self.pupspawn = False
         self.pup_down = True
         self.fly_by = True
+        self.barr_type = 'none'
         self.ccor = [0, 1]
+        self.triple_shoot = False
         self.shooting = True
         self.shot = False
         self.setter()
@@ -218,8 +220,12 @@ class Sprite:
         if ldir:
             self.pos[0] -= self.speed * spe_schange
             if self.pos[0] < 0:
+                if self.stype == 'bullet':
+                    if self.barr_type == 'left_bull':
+                        lepop = left_bull.index(self)
+                        pre_bullets.append(left_bull.pop(lepop))
                 self.pos[0] = 0
-        elif rdir: 
+        if rdir: 
             self.pos[0] += self.speed * spe_schange
             if self.pos[0] > w - self.width:
                 self.pos[0] = w - self.width
@@ -228,7 +234,11 @@ class Sprite:
                 if self.stype == 'fly':
                     self.pos = [0, 80]
                     fly_wait.append(fly_cat.pop())
-        elif ddir:
+                if self.stype == 'bullet':
+                    if self.barr_type == 'right_bull':
+                        ripop = right_bull.index(self)
+                        pre_bullets.append(right_bull.pop(ripop))
+        if ddir:
             self.pos[1] += self.speed * spe_schange
             if self.pos[1] > h:
                 if self.stype == 'enemy':
@@ -238,8 +248,20 @@ class Sprite:
                 elif self.stype == 'drop':
                     self.pos = [random.randint(0, w), random.randint(-800, -20)]
                     drop_wait.append(drop_cat.pop())
-        elif udir:
+        if udir:
             self.pos[1] -= self.speed * spe_schange
+            if self.stype == 'bullet':
+                if self.pos[1] < 0:
+                    if self.stype == 'bullet':
+                        if self.barr_type == 'left_bull':
+                            lepop = left_bull.index(self)
+                            pre_bullets.append(left_bull.pop(lepop))
+                        elif self.barr_type == 'right_bull':
+                            ripop = right_bull.index(self)
+                            pre_bullets.append(right_bull.pop(ripop))
+                        else:
+                            bullpop = bullets.index(self)
+                            pre_bullets.append(bullets.pop(bullpop))
 
     def handle_spawn(self):
         if self.stype == 'player':
@@ -263,12 +285,7 @@ class Sprite:
 
 
     def check_collision(self, t1):
-        #Set diff collisions for the fly-cat
-        if self.stype == 'bullet':
-            bullpop = bullets.index(self)
-            if self.pos[1] < 0 or self.pos[0] < 0 or self.pos[0] > w - self.width:
-                pre_bullets.append(bullets.pop(bullpop))
-        elif self.stype != 'bullet':
+        if self.stype != 'bullet':
             if self.pos[0] < 0:
                 if self.stype == 'pup':
                     self.speed *= -1
@@ -283,8 +300,15 @@ class Sprite:
             if distance < 35:
                 if self.stype == 'enemy':
                     if t1.stype == 'bullet':
-                        bullpop = bullets.index(t1)
-                        pre_bullets.append(bullets.pop(bullpop))
+                        if t1.barr_type == 'left_bull':
+                            lepop = left_bull.index(t1)
+                            pre_bullets.append(left_bull.pop(lepop))
+                        elif t1.barr_type == 'right_bull':
+                            ripop = right_bull.index(t1)
+                            pre_bullets.append(left_bull.pop(ripop))
+                        else:
+                            bullpop = bullets.index(t1)
+                            pre_bullets.append(bullets.pop(bullpop))
                     self.set_costumes()
                     self.pos = [random.randint(0, w), random.randint(-800, -20)]
                     return True
@@ -293,8 +317,15 @@ class Sprite:
                     return True
                 elif self.stype == 'fly':
                     if t1.stype == 'bullet':
-                        bullp2 = bullets.index(t1)
-                        pre_bullets.append(bullets.pop(bullp2))
+                        if t1.barr_type == 'left_bull':
+                            lepop = left_bull.index(t1)
+                            pre_bullets.append(left_bull.pop(lepop))
+                        elif t1.barr_type == 'right_bull':
+                            ripop = right_bull.index(t1)
+                            pre_bullets.append(left_bull.pop(ripop))
+                        else:
+                            bullpop = bullets.index(t1)
+                            pre_bullets.append(bullets.pop(bullpop))
                     self.pos = [0, 80]
                     fly_wait.append(fly_cat.pop())
                     return True
@@ -306,25 +337,33 @@ class Sprite:
             self.size = new_cos['size']
             self.second_init(self.stype, self.image, self.speed, self.posIn, self.size)
 
-    def array_mover(self):
+    def array_mover(self, arr_type):
         if len(pre_bullets) > 0:
             pre_bullets[0].pos = [self.pos[0] + self.width * 0.3, self.pos[1] - self.height * 0.3]
-            bullets.append(pre_bullets.pop(0))
+            pre_bullets[0].barr_type = arr_type
+            if arr_type == 'left_bull':
+                left_bull.append(pre_bullets.pop(0))
+            elif arr_type == 'right_bull':
+                right_bull.append(pre_bullets.pop(0))
+            elif arr_type == 'straight':
+                bullets.append(pre_bullets.pop(0))
 
-    def shooter(self, press, hold, lvl):
+
+    def shooter(self, press, hold, arr_type):
         if self.shooting == False or self.shot == True:
             return
         if press:
             # bullets.append(Sprite('bullet', pather('./assets/bweb2.png'), 0.5, [Player.ccor[0], Player.ccor[1] + 5], [25, 25]))
-            self.array_mover()
+            self.array_mover(arr_type)
             self.shooting = False
             self.shot = True
             Timer(0.1, self.shoot_timer).start()
         elif hold: 
             # bullets.append(Sprite('bullet', pather('./assets/bweb2.png'), 0.5, [Player.ccor[0], Player.ccor[1] + 5], [25, 25]))
-            self.array_mover()
+            self.array_mover(arr_type)
             self.shooting = False
-            Timer(0.05, self.shoot_timer).start()
+            # Timer(0.05, self.shoot_timer).start()
+            Timer(0.005, self.shoot_timer).start()
         else:
             return
 
@@ -411,6 +450,9 @@ Player = Sprite('player', pather('./assets/player.png'), 0.4, [w / 2, h - 40], [
 #Set Bullets
 number_of_bullets = 50
 bullets = []
+left_bull = []
+right_bull = []
+all_bulls = bullets + left_bull + right_bull
 pre_bullets = []
 for bulletss in range(number_of_bullets):
     pre_bullets.append(Sprite('bullet', pather('./assets/bweb2.png'), 0.35, [-30, -30], [25, 25]))
@@ -425,7 +467,7 @@ for pupss in range(num_pups):
     pup_wait.append(Sprite('pup', pather('./assets/drop-cat.png'), 0.6, [-140, -140], [60, 45]))
 
 fly_cat = []
-fly_wait = [Sprite('fly', pather('./assets/fly-cat.png'), 0.5, [0, 80], [100, 75])]
+fly_wait = [Sprite('fly', pather('./assets/fly-cat.png'), 0.4, [0, 80], [100, 75])]
 
 #Set Enemies
 number_of_enemies = 15
@@ -433,6 +475,9 @@ enem_lis = []
 temp_enem = []
 for enemiess in range(number_of_enemies):
     enem_lis.append(Sprite('enemy', pather('./assets/bmouse.png'), 0.12, [random.randint(0, w), random.randint(-1200, -20)], [50, 65]))
+
+Player.triple_shoot = True
+Player.left_shoot = True
 
 def main():
     while Gvar.game_loop:
@@ -493,13 +538,36 @@ def main():
             Player.spawn_drop(end)
             Player.spawn_fly(end)
         Player.movement(Gvar.keys.get('key_left', False), Gvar.keys.get('key_right', False), False, False, Gvar.speed_watcher(True, False))
-        if Gvar.level < 3:
-            Player.shooter(Gvar.keys.get('key_space'), False, Gvar.level)
+        if Gvar.level < 0:
+            Player.shooter(Gvar.keys.get('key_space'), False, 'straight')
         else: 
-            Player.shooter(False, Gvar.keys.get('key_space'), Gvar.level)
+            if Player.triple_shoot:
+                # Player.shooter(False, Gvar.keys.get('key_space'), 'left_bull')
+                # Player.shooter(False, Gvar.keys.get('key_space'), 'straight')
+                # Player.shooter(False, Gvar.keys.get('key_space'), 'right_bull')
+                if Player.left_shoot:
+                    Player.left_shoot = False
+                    Player.straight_shoot = True
+                    Player.shooter(False, Gvar.keys.get('key_space'), 'left_bull')
+                elif Player.straight_shoot:
+                    Player.straight_shoot = False
+                    Player.right_shoot = True
+                    Player.shooter(False, Gvar.keys.get('key_space'), 'straight')
+                elif Player.right_shoot:
+                    Player.right_shoot = False
+                    Player.left_shoot = True
+                    Player.shooter(False, Gvar.keys.get('key_space'), 'right_bull')
+            else:
+                Player.shooter(False, Gvar.keys.get('key_space'), 'straight')
         for Bullet in bullets:
             Bullet.handle_spawn()
             Bullet.movement(False, False, False, True, Gvar.speed_watcher(True, False))
+        for Bullet in left_bull:
+            Bullet.handle_spawn()
+            Bullet.movement(True, False, False, True, Gvar.speed_watcher(True, False))
+        for Bullet in right_bull:
+            Bullet.handle_spawn()
+            Bullet.movement(False, True, False, True, Gvar.speed_watcher(True, False))
 
         for Drop in drop_cat:
             Drop.handle_spawn()
@@ -510,11 +578,14 @@ def main():
             
         for Fly in fly_cat:
             Fly.handle_spawn()
-            for Bullet in bullets:
+            for Bullet in all_bulls:
                 if Fly.check_collision(Bullet):
                     Gvar.lives += 1
-                    # If level > 3:
-                    #   broadcast(killed_kitteh_sad_face)
+                    if Gvar.level > 3:
+                        Player.triple_shoot = True
+                        Player.left_shoot = True
+                        Player.right_shoot = False
+                        Player.straight_shoot = False
             Fly.movement(False, True, False, False, Gvar.speed_watcher(True, False))
 
         for Pup in pups:
@@ -524,7 +595,7 @@ def main():
         for Enemies in enem_lis:
             # Enemies.check_collision(Bullet) #This may be different
             Enemies.handle_spawn()
-            for Bullet in bullets:
+            for Bullet in all_bulls:
                 if Enemies.check_collision(Bullet):
                     Gvar.score += 1
             for Pup in pups:
