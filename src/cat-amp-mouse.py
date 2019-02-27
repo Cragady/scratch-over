@@ -186,6 +186,7 @@ class Sprite:
         self.fly_by = True
         self.triple_shoot = False
         self.bull_place = 0
+        self.tstart = 0
         self.ccor = [0, 1]
         self.shooting = True
         self.shot = False
@@ -220,11 +221,13 @@ class Sprite:
         if ldir:
             self.pos[0] -= self.speed * spe_schange
             if self.pos[0] < 0:
-                self.pos[0] = 0
+                if self.stype != 'bullet':
+                    self.pos[0] = 0
         elif rdir: 
             self.pos[0] += self.speed * spe_schange
             if self.pos[0] > w - self.width:
-                self.pos[0] = w - self.width
+                if self.stype != 'bullet':
+                    self.pos[0] = w - self.width
                 if self.stype == 'pup':
                     self.speed *= -1
                 if self.stype == 'fly':
@@ -377,13 +380,22 @@ class Sprite:
             self.fly_ex = True
             self.fly_end = random.randint(7, 15)
         ender = end - self.fstart
-        if self.fly_end -1 <  ender < self.fly_end:
+        if self.fly_end -1 <  ender < self.fly_end and self.triple_shoot != True:
             if len(fly_wait) > 0:
                 self.fly_ex = False
                 self.fly_by = True
                 fly_cat.append(fly_wait.pop())
         elif self.fly_ex == True:
             return
+
+    def stop_trip(self, end):
+        if self.triple_shoot and self.tstart == 0:
+            self.tstart = time.time()
+        if self.tstart > 0:
+            ender = end - self.tstart
+            if 5 < ender < 6:
+                self.tstart = 0
+                self.triple_shoot = False
 
 
 def play_music(sarr):
@@ -445,7 +457,7 @@ for enemiess in range(number_of_enemies):
 
 def main():
     while Gvar.game_loop:
-        if Gvar.lives < -300000:
+        if Gvar.lives < 0:
                 Gvar.game_loop = False
 
             
@@ -501,8 +513,9 @@ def main():
             end = time.time()
             Player.spawn_drop(end)
             Player.spawn_fly(end)
+            Player.stop_trip(end)
         Player.movement(Gvar.keys.get('key_left', False), Gvar.keys.get('key_right', False), False, False, Gvar.speed_watcher(True, False))
-        if Gvar.level < 0:
+        if Gvar.level < 3:
             Player.shooter(Gvar.keys.get('key_space'), False, Gvar.level)
         else: 
             Player.shooter(False, Gvar.keys.get('key_space'), Gvar.level)
@@ -531,7 +544,7 @@ def main():
                 if Fly.check_collision(Bullet):
                     Gvar.lives += 1
                     if Gvar.level > 3:
-                      Player.triple_shoot = True
+                        Player.triple_shoot = True
             Fly.movement(False, True, False, False, Gvar.speed_watcher(True, False))
 
         for Pup in pups:
