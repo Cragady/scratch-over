@@ -15,6 +15,7 @@ So far, it seems like all of my code is spaghetti, but it works.
 * Add deactivation timer for triple shooting
 * Set improved shooting back to lvl 3
 * Set game end back to lives = 0 instead of lives = -300000
+* Maybe slow down mice and cat tiles just a smidgen
 
 # Later Things
 
