@@ -13,7 +13,7 @@ So far, it seems like all of my code is spaghetti, but it works.
 # Things
 
 * ~~Fix music timing, starts too early sometimes~~
-* Fix music while paused in transition (Kinda fixed)
+* Fix music while paused in transition (Kinda mostly fixed)
   * This fix can be applied to make sure the powerups don't have the same problem
 * Powerups kinda fixed too, the pausing mechanic throws off the timing and can potentially be abused to get a power up spawned just by waiting awhile in the pause menu
   * Can possibly remedy this by applying the exact fix you used to fix the music timing
@@ -22,8 +22,7 @@ So far, it seems like all of my code is spaghetti, but it works.
 
 ## To Do 2
 
-* Clean/Organize
-* Meow sound on game over
+* Clean/Organize?
 * Change web sprite on powerup?
 * Change direction of fly_cat randomlY?
 * Maybe add input from pause to have immediate response? And maybe if key is still held, don't delete it?

@@ -575,12 +575,12 @@ def start_screen():
         pygame.display.update()
 
 def main():
-
     while Gvar.game_loop:
 
         if Gvar.lives < 0:
             pygame.mixer.music.stop()            
             pygame.mixer.stop()
+            pygame.mixer.Channel(1).play(pygame.mixer.Sound(pather('./assets/Meow.mp3.wav')))
             Gvar.game_loop = False
 
         if Gvar.level < 4:
