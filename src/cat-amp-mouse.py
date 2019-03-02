@@ -66,6 +66,8 @@ class game_vars:
         self.secondtxt = False
         self.thirdtxt = False
         self.sscreen = True
+        self.pause_time = 0
+        self.last_pause = 0
         self.messcolor = [0, 0, 0]
         self.messfont = pygame.font.SysFont('Arial', 30)
         self.mess_surface = pygame.Surface((300, 100))
@@ -154,15 +156,35 @@ class game_vars:
                 return len(bullets) * 0.06 + len(pups) * 0.06 + 3
                 
     def pause(self, pauser):
+        all_arr = bullets + pups + drop_cat + fly_cat + enem_lis
+        pause_start = time.time()
+        if self.pause_time != 0:
+            self.last_pause = self.pause_time
         while pauser:
+            Player.handle_spawn()
+            for Sprite in all_arr:
+                Sprite.handle_spawn()
+            self.score_card()
+            if self.level == 3:
+                self.show_message()
+
+            #Set Pause screen here
+
+            pygame.display.update()
             for event in pygame.event.get():
                 if (event.type == pygame.QUIT):
                     pygame.quit()
                     sys.exit()
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
+                        pygame.mixer.music.unpause()
+                        pygame.mixer.unpause()
+                        self.pause_time = time.time() - pause_start
                         pauser = False
                     elif event.key == pygame.K_RETURN:
+                        pygame.mixer.music.unpause()
+                        pygame.mixer.unpause()
+                        self.pause_time = time.time() - pause_start
                         pauser = False
                     elif event.key == pygame.K_F4 and pygame.key.get_mods() & pygame.KMOD_ALT:
                         pygame.quit()
@@ -414,7 +436,11 @@ def play_music(sarr, end):
                 pygame.mixer.music.load(muse_arr[2])
                 pygame.mixer.Channel(1).play(pygame.mixer.Sound(muse_arr[1]))
             if Gvar.mix_stop != False:
-                if 2.8 - 0.045 < ender < 2.8:
+                transit = 2.8
+                if Gvar.pause_time != 0 and Gvar.pause_time != Gvar.last_pause:
+                    transit += Gvar.pause_time
+                    print(transit, ' transit')
+                if transit - 0.045 < ender < transit:
                     Gvar.music = False
                     Gvar.mix_stop = False
                     pygame.mixer.music.play(-1)
@@ -429,7 +455,7 @@ def once_only():
         Gvar.mix_stop = time.time()
 
 def global_inits():
-    global muse_arr, Gvar, Player, number_of_bullets, bullets, pre_bullets, num_pups, pups, pup_wait, drop_cat, drop_wait, fly_cat, fly_wait, number_of_enemies, enem_lis, temp_enem
+    global muse_arr, Gvar, Player, number_of_bullets, bullets, pre_bullets, num_pups, pups, pup_wait, drop_cat, drop_wait, fly_cat, fly_wait, number_of_enemies, enem_lis
     #Knitting more game vars
     
     muse_arr = [
@@ -466,7 +492,6 @@ def global_inits():
     #Set Enemies
     number_of_enemies = 15
     enem_lis = []
-    temp_enem = []
     for enemiess in range(number_of_enemies):
         enem_lis.append(Sprite('enemy', pather('./assets/bmouse.png'), 0.12, [random.randint(0, w), random.randint(-1200, -20)], [50, 65]))
 
@@ -566,8 +591,9 @@ def main():
                     Gvar.keys['key_right'] = True
                 elif event.key == pygame.K_SPACE:
                     Gvar.keys['key_space'] = True
-                            
                 elif event.key == pygame.K_RETURN:
+                    pygame.mixer.music.pause()
+                    pygame.mixer.pause()
                     Gvar.pause(True)
                 elif event.key == pygame.K_ESCAPE:
                     pygame.mixer.music.stop()
