@@ -233,7 +233,8 @@ class Sprite:
                     self.speed *= -1
                 if self.stype == 'fly':
                     self.pos = [0, 80]
-                    fly_wait.append(fly_cat.pop())
+                    if len(fly_cat) > 0:
+                        fly_wait.append(fly_cat.pop())
         elif ddir:
             self.pos[1] += self.speed * spe_schange
             if self.pos[1] > h:
@@ -413,7 +414,7 @@ def play_music(sarr, end):
                 pygame.mixer.music.load(muse_arr[2])
                 pygame.mixer.Channel(1).play(pygame.mixer.Sound(muse_arr[1]))
             if Gvar.mix_stop != False:
-                if 2.8 - 0.073 < ender < 2.8:
+                if 2.8 - 0.045 < ender < 2.8:
                     Gvar.music = False
                     Gvar.mix_stop = False
                     pygame.mixer.music.play(-1)
@@ -430,6 +431,7 @@ def once_only():
 def global_inits():
     global muse_arr, Gvar, Player, number_of_bullets, bullets, pre_bullets, num_pups, pups, pup_wait, drop_cat, drop_wait, fly_cat, fly_wait, number_of_enemies, enem_lis, temp_enem
     #Knitting more game vars
+    
     muse_arr = [
         pather('./assets/08 Looping Steps.mp3'),
         pather('./assets/Intro.wav'),
@@ -469,8 +471,37 @@ def global_inits():
         enem_lis.append(Sprite('enemy', pather('./assets/bmouse.png'), 0.12, [random.randint(0, w), random.randint(-1200, -20)], [50, 65]))
 
 def start_screen():
+    first_time = True
+    start_font = pygame.font.SysFont('Arial', 23)
+    play_font = pygame.font.SysFont('Arial', 35)
+    start_surface = pygame.Surface((w - 100, h - 100))
+    ssw, ssh = start_surface.get_size()
+    start_surface.set_alpha(120)
+    sarrow = start_font.render('Left and Right arrows to move', False, [255, 255, 255])
+    sspace = start_font.render('Space to shoot', False, [255, 255, 255])
+    sesc = start_font.render('Esc to quit game. On start screen, this closes the window', False, [255, 255, 255])
+    senter = start_font.render('Enter to pause. On start screen, this starts the game', False, [255, 255, 255])
+    sstarter = play_font.render('Enter/Space to play!', False, [255, 255, 255])
+    ssaw, ssah = sarrow.get_rect().size
+    sssw, sssph = sspace.get_rect().size
+    ssesw, ssesh = sesc.get_rect().size
+    ssenw, ssenh = senter.get_rect().size
+    ssstw, sssth = sstarter.get_rect().size
+
+    game_overimg = pygame.image.load(pather('./assets/stop.png')).convert_alpha()
+    game_overimg = pygame.transform.scale(game_overimg, (round(w * 0.6), h))
+    gow, goh = game_overimg.get_size()
+
     while True:
         window.blit(background_image, [0, 0])
+        if not first_time:
+            window.blit(game_overimg, [w / 2 - gow / 2, 0])
+        start_surface.blit(sarrow, [ssw / 2 - ssaw / 2, ssh / 4])
+        start_surface.blit(sspace, [ssw / 2 - sssw / 2, ssh / 4 + ssah])
+        start_surface.blit(sesc, [ssw / 2 - ssesw / 2, ssh / 4 + ssah * 2])
+        start_surface.blit(senter, [ssw / 2 - ssenw / 2, ssh / 4 + ssah * 3])
+        start_surface.blit(sstarter, [ssw / 2 - ssstw / 2, ssh / 4 + ssah * 5])
+        window.blit(start_surface, [(w - ssw) / 2, (h - ssh) / 2])
 
         for event in pygame.event.get():
             if (event.type == pygame.QUIT):
@@ -478,16 +509,23 @@ def start_screen():
                 pygame.quit()
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RETURN:
-                    global_inits() # test test test
-                    main()
-                elif event.key == pygame.K_ESCAPE:
+                if event.key == pygame.K_ESCAPE:
                     Player.quit = True
                     pygame.quit()
                     sys.exit()
                 elif event.key == pygame.K_F4 and pygame.key.get_mods() & pygame.KMOD_ALT:
                     pygame.quit()
                     sys.exit()
+            elif event.type == pygame.KEYUP:
+                if event.key == pygame.K_SPACE:
+                    first_time = False
+                    global_inits()
+                    main()
+                elif event.key == pygame.K_RETURN:
+                    first_time = False
+                    global_inits()
+                    main()
+
         
         pygame.display.update()
 
