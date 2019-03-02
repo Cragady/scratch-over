@@ -65,6 +65,7 @@ class game_vars:
         self.firstxt = True
         self.secondtxt = False
         self.thirdtxt = False
+        self.sscreen = True
         self.messcolor = [0, 0, 0]
         self.messfont = pygame.font.SysFont('Arial', 30)
         self.mess_surface = pygame.Surface((300, 100))
@@ -153,7 +154,7 @@ class game_vars:
                 return len(bullets) * 0.06 + len(pups) * 0.06 + 3
                 
     def pause(self, pauser):
-        while pauser == True:
+        while pauser:
             for event in pygame.event.get():
                 if (event.type == pygame.QUIT):
                     pygame.quit()
@@ -455,11 +456,35 @@ temp_enem = []
 for enemiess in range(number_of_enemies):
     enem_lis.append(Sprite('enemy', pather('./assets/bmouse.png'), 0.12, [random.randint(0, w), random.randint(-1200, -20)], [50, 65]))
 
+def start_screen():
+    while True:
+        window.blit(background_image, [0, 0])
+        pygame.display.update()
+
+        for event in pygame.event.get():
+            if (event.type == pygame.QUIT):
+                Player.quit = True
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN:
+                    # Gvar.sscreen = False
+                    main()
+                    return start_sc
+                elif event.key == pygame.K_ESCAPE:
+                    Player.quit = True
+                    pygame.quit()
+                    sys.exit()
+                elif event.key == pygame.K_F4 and pygame.key.get_mods() & pygame.KMOD_ALT:
+                    pygame.quit()
+                    sys.exit()
+
 def main():
+
     while Gvar.game_loop:
+
         if Gvar.lives < 0:
                 Gvar.game_loop = False
-
             
         if Gvar.level < 4:
             if pygame.mixer.music.get_busy() == False:
@@ -568,4 +593,5 @@ def main():
 
         pygame.display.update()
 
-main()
+start_screen()
+# main()

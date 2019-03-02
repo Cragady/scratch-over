@@ -10,10 +10,6 @@ A week or two ago (Date today is 2/22/19), I decided to learn a little bit of Py
 
 So far, it seems like all of my code is spaghetti, but it works.
 
-# To Do
-* Set improved shooting back to lvl 3
-* Maybe slow down mice and cat tiles just a smidgen
-
 # Later Things
 
 ## To Do 2
