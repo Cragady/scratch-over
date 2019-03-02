@@ -459,7 +459,6 @@ for enemiess in range(number_of_enemies):
 def start_screen():
     while True:
         window.blit(background_image, [0, 0])
-        pygame.display.update()
 
         for event in pygame.event.get():
             if (event.type == pygame.QUIT):
@@ -468,9 +467,7 @@ def start_screen():
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
-                    # Gvar.sscreen = False
                     main()
-                    return start_sc
                 elif event.key == pygame.K_ESCAPE:
                     Player.quit = True
                     pygame.quit()
@@ -478,6 +475,8 @@ def start_screen():
                 elif event.key == pygame.K_F4 and pygame.key.get_mods() & pygame.KMOD_ALT:
                     pygame.quit()
                     sys.exit()
+        
+        pygame.display.update()
 
 def main():
 
