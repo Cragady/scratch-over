@@ -35,7 +35,7 @@ So far, it seems like all of my code is spaghetti, but it works.
 
 * Sometimes fly_cat will crash the game, err given: cannot pop from empty list (interesting)
   * Make fly_cat invulnerable for half a second or one?
-* Sometimes The game won't start on enter/space but will play the music. Just push esc/enter, and this will unfreeze and put you into the game
+* Sometimes The game will pause immediately if enter is pressed too quickly on start screen. Just push esc/enter, and this will unpause and put you into the game
 * Occasional lag
 * Music has weird timing while transitioning every now and then
 * Pausing may disrupt the powerups (slight fix implemented)
