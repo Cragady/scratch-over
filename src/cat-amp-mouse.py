@@ -164,7 +164,15 @@ class game_vars:
         self.mus_switch = True
         if self.pause_time != 0:
             self.last_pause = self.pause_time
+
+        pause_font = pygame.font.SysFont('Arial', 35)
+        pause_surface = pygame.Surface((w - 100, h - 100))
+        pspw, psph = pause_surface.get_size()
+        pause_surface.set_alpha(120)
+        pspesc = pause_font.render('Paused, Enter/Esc to unpause', False, [255, 255, 255])
+        pspew, pspeh = pspesc.get_rect().size
         while pauser:
+            window.blit(background_image, [0, 0])
             Player.handle_spawn()
             for Sprite in all_arr:
                 Sprite.handle_spawn()
@@ -173,6 +181,8 @@ class game_vars:
                 self.show_message()
 
             #Set Pause screen here
+            pause_surface.blit(pspesc, [pspw / 2 - pspew / 2, psph /2 - pspeh / 2])
+            window.blit(pause_surface, [(w - pspw) / 2, (h - psph) / 2])
 
             pygame.display.update()
             for event in pygame.event.get():

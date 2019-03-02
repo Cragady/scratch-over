@@ -24,11 +24,12 @@ So far, it seems like all of my code is spaghetti, but it works.
 
 * Clean/Organize
 * Meow sound on game over
-* Fill in pause screen
 * Change web sprite on powerup?
 * Change direction of fly_cat randomlY?
 * Maybe add input from pause to have immediate response? And maybe if key is still held, don't delete it?
   * Might have to make the event loop almost the same as the main game event loop to do this
+* Add mute button?
+* Add volume control on main game and/or pause screen and/or start screen?
 
 # Known Bugs
 
