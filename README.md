@@ -27,6 +27,8 @@ So far, it seems like all of my code is spaghetti, but it works.
 * Fill in pause screen
 * Change web sprite on powerup?
 * Change direction of fly_cat randomlY?
+* Maybe add input from pause to have immediate response? And maybe if key is still held, don't delete it?
+  * Might have to make the event loop almost the same as the main game event loop to do this
 
 # Known Bugs
 
@@ -35,11 +37,11 @@ So far, it seems like all of my code is spaghetti, but it works.
 * Sometimes The game won't start on enter/space but will play the music. Just push esc/enter, and this will unfreeze and put you into the game
 * Occasional lag
 * Music has weird timing while transitioning every now and then
-* Certain button inputs pressed right before/after the Space/Enter, to initiate game start, will crash the game
-  * Map the buttons to return in event loop?
-* Game will hold down the previously held button indefinitely after holding said button going into a pause. Once unpaused though, to rectify this, just push that same button again
-  * Find a way to ignore keypress going into pause. Will probably fix issue with game crash from start screen with other button presses as well
 * Pausing may disrupt the powerups (slight fix implemented)
-* Check collision in spawn can cause game to crash on pause
 
 * More bugs to come!
+
+# Fixes That Might Need More Stress Testing
+
+* Game crash from button inputs going to main game from start screen and pause screen
+* Check collision in spawn causing game to crash on pause

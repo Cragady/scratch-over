@@ -69,6 +69,7 @@ class game_vars:
         self.pause_time = 0
         self.last_pause = 0
         self.mw_trans = 2.8
+        self.paused = False
         self.messcolor = [0, 0, 0]
         self.messfont = pygame.font.SysFont('Arial', 30)
         self.mess_surface = pygame.Surface((300, 100))
@@ -159,6 +160,7 @@ class game_vars:
     def pause(self, pauser):
         all_arr = bullets + pups + drop_cat + fly_cat + enem_lis
         pause_start = time.time()
+        self.paused = True
         self.mus_switch = True
         if self.pause_time != 0:
             self.last_pause = self.pause_time
@@ -178,19 +180,23 @@ class game_vars:
                     pygame.quit()
                     sys.exit()
                 elif event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_ESCAPE:
+                    if event.key == pygame.K_F4 and pygame.key.get_mods() & pygame.KMOD_ALT:
+                        pygame.quit()
+                        sys.exit()
+                    elif event.key == pygame.K_ESCAPE:
                         pygame.mixer.music.unpause()
                         pygame.mixer.unpause()
+                        self.paused = False
                         self.pause_time = time.time() - pause_start
+                        Gvar.keys = {}
                         pauser = False
                     elif event.key == pygame.K_RETURN:
                         pygame.mixer.music.unpause()
                         pygame.mixer.unpause()
+                        self.paused = False
                         self.pause_time = time.time() - pause_start
+                        Gvar.keys = {}
                         pauser = False
-                    elif event.key == pygame.K_F4 and pygame.key.get_mods() & pygame.KMOD_ALT:
-                        pygame.quit()
-                        sys.exit()
 
 #Sprite Template
 class Sprite:
@@ -280,7 +286,8 @@ class Sprite:
             if self.pos[1] >= 0:
                 window.blit(self.sprite, (self.pos[0], self.pos[1]))
         if self.stype == 'bullet':
-            self.check_collision(False)
+            if not Gvar.paused:
+                self.check_collision(False)
             window.blit(self.sprite, (self.pos[0], self.pos[1]))
         if self.stype == 'drop':
             self.check_collision(False)
@@ -454,6 +461,7 @@ def once_only():
         Gvar.once = False
         Gvar.music = True
         Gvar.async_mus = True
+        Gvar.mus_switch = False
         Gvar.mix_stop = time.time()
 
 def global_inits():
@@ -564,7 +572,7 @@ def main():
             pygame.mixer.music.stop()            
             pygame.mixer.stop()
             Gvar.game_loop = False
-            
+
         if Gvar.level < 4:
             if pygame.mixer.music.get_busy() == False:
                 play_music(0, False)
@@ -596,22 +604,24 @@ def main():
                 elif event.key == pygame.K_RETURN:
                     pygame.mixer.music.pause()
                     pygame.mixer.pause()
+                    Gvar.keys = {}
                     Gvar.pause(True)
                 elif event.key == pygame.K_ESCAPE:
                     pygame.mixer.music.stop()
                     pygame.mixer.stop()
+                    Gvar.keys = {}
                     Gvar.game_loop = False
                 elif event.key == pygame.K_F4 and pygame.key.get_mods() & pygame.KMOD_ALT:
                     pygame.quit()
                     sys.exit()
             elif event.type == pygame.KEYUP:
                 if event.key == pygame.K_LEFT:
-                    del Gvar.keys['key_left']
+                    Gvar.keys.pop('key_left', None)
                 elif event.key == pygame.K_RIGHT:
-                    del Gvar.keys['key_right']
+                    Gvar.keys.pop('key_right', None)
                 elif event.key == pygame.K_SPACE:
                     Player.shot = False
-                    del Gvar.keys['key_space']
+                    Gvar.keys.pop('key_space', None)
 
         #Score Listener
         Gvar.level = Gvar.score_watcher(Gvar.score)
