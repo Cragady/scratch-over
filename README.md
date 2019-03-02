@@ -45,3 +45,11 @@ So far, it seems like all of my code is spaghetti, but it works.
 
 * Game crash from button inputs going to main game from start screen and pause screen
 * Check collision in spawn causing game to crash on pause
+
+# Extra Notes
+
+### Png crush images that have been edited
+
+* [How to do](https://stackoverflow.com/questions/22745076/libpng-warning-iccp-known-incorrect-srgb-profile/29337595#29337595)
+* In Terminal/CL
+  * `pngcrush -ow -rem allb -reduce file.png`
