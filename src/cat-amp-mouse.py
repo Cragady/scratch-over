@@ -68,6 +68,7 @@ class game_vars:
         self.sscreen = True
         self.pause_time = 0
         self.last_pause = 0
+        self.mw_trans = 2.8
         self.messcolor = [0, 0, 0]
         self.messfont = pygame.font.SysFont('Arial', 30)
         self.mess_surface = pygame.Surface((300, 100))
@@ -158,6 +159,7 @@ class game_vars:
     def pause(self, pauser):
         all_arr = bullets + pups + drop_cat + fly_cat + enem_lis
         pause_start = time.time()
+        self.mus_switch = True
         if self.pause_time != 0:
             self.last_pause = self.pause_time
         while pauser:
@@ -379,7 +381,7 @@ class Sprite:
             if self.pup_down:
                 self.pup_down = False
                 self.down_start = time.time()
-            if 10 - 1 < end - self.down_start < 10:
+            if 10 < end - self.down_start:
                 self.pup_down = True
                 self.pupspawn = False
                 self.drop_spawn = True
@@ -391,7 +393,7 @@ class Sprite:
                 self.dstart = time.time()
                 self.end_point = random.randint(10, 13)
             ender = end - self.dstart
-            if self.end_point - 1 < ender < self.end_point:
+            if self.end_point < ender:
                 self.quit = True
                 if len(drop_wait) > 0:
                     drop_cat.append(drop_wait.pop())
@@ -404,7 +406,7 @@ class Sprite:
             self.fly_ex = True
             self.fly_end = random.randint(7, 15)
         ender = end - self.fstart
-        if self.fly_end -1 <  ender < self.fly_end and self.triple_shoot != True:
+        if self.fly_end <  ender and self.triple_shoot != True:
             if len(fly_wait) > 0:
                 self.fly_ex = False
                 self.fly_by = True
@@ -417,7 +419,7 @@ class Sprite:
             self.tstart = time.time()
         if self.tstart > 0:
             ender = end - self.tstart
-            if 5 < ender < 6:
+            if 6 < ender:
                 self.tstart = 0
                 self.triple_shoot = False
 
@@ -436,10 +438,10 @@ def play_music(sarr, end):
                 pygame.mixer.music.load(muse_arr[2])
                 pygame.mixer.Channel(1).play(pygame.mixer.Sound(muse_arr[1]))
             if Gvar.mix_stop != False:
-                transit = 2.8
-                if Gvar.pause_time != 0 and Gvar.pause_time != Gvar.last_pause:
-                    transit += Gvar.pause_time
-                    print(transit, ' transit')
+                if Gvar.pause_time != 0 and Gvar.mus_switch:
+                    Gvar.mus_switch = False
+                    Gvar.mw_trans += Gvar.pause_time
+                transit = Gvar.mw_trans
                 if transit - 0.045 < ender < transit:
                     Gvar.music = False
                     Gvar.mix_stop = False
