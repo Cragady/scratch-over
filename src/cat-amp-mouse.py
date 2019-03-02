@@ -399,62 +399,74 @@ class Sprite:
                 self.triple_shoot = False
 
 
-def play_music(sarr):
+def play_music(sarr, end):
     if Gvar.music:
-        Gvar.music = False
         if sarr == 0:
+            Gvar.music = False
             pygame.mixer.music.load(muse_arr[sarr])
             pygame.mixer.music.play(-1)
             pygame.mixer.music.queue(muse_arr[2])
         else:
-            pygame.mixer.music.load(muse_arr[2])
-            pygame.mixer.Channel(1).play(pygame.mixer.Sound(muse_arr[1]))
-            Timer(2.873, pygame.mixer.music.play, [-1]).start()
+            ender = end - Gvar.mix_stop
+            if Gvar.async_mus:
+                Gvar.async_mus = False
+                pygame.mixer.music.load(muse_arr[2])
+                pygame.mixer.Channel(1).play(pygame.mixer.Sound(muse_arr[1]))
+            if Gvar.mix_stop != False:
+                if 2.8 - 0.073 < ender < 2.8:
+                    Gvar.music = False
+                    Gvar.mix_stop = False
+                    pygame.mixer.music.play(-1)
+            # Timer(2.873, pygame.mixer.music.play, [-1]).start()
 
 def once_only():
     if Gvar.once == True:
         pygame.mixer.music.stop()
         Gvar.once = False
         Gvar.music = True
+        Gvar.async_mus = True
+        Gvar.mix_stop = time.time()
 
-#Knitting more game vars
-muse_arr = [
-    pather('./assets/08 Looping Steps.mp3'),
-    pather('./assets/Intro.wav'),
-    pather('./assets/06 Slider.mp3')
-    ]
+def global_inits():
+    global muse_arr, Gvar, Player, number_of_bullets, bullets, pre_bullets, num_pups, pups, pup_wait, drop_cat, drop_wait, fly_cat, fly_wait, number_of_enemies, enem_lis, temp_enem
+    #Knitting more game vars
+    muse_arr = [
+        pather('./assets/08 Looping Steps.mp3'),
+        pather('./assets/Intro.wav'),
+        pather('./assets/06 Slider.mp3')
+        ]
 
-pygame.mixer.init()
-Gvar = game_vars()
+    pygame.mixer.init()
+    Gvar = game_vars()
 
-#Set Player Sprite
-Player = Sprite('player', pather('./assets/player.png'), 0.4, [w / 2, h - 40], [60, 45])
+    #Set Player Sprite
+    Player = Sprite('player', pather('./assets/player.png'), 0.4, [w / 2, h - 40], [60, 45])
 
-#Set Bullets
-number_of_bullets = 50
-bullets = []
-pre_bullets = []
-for bulletss in range(number_of_bullets):
-    pre_bullets.append(Sprite('bullet', pather('./assets/bweb2.png'), 0.35, [-30, -30], [25, 25]))
+    #Set Bullets
+    number_of_bullets = 50
+    bullets = []
+    pre_bullets = []
+    for bulletss in range(number_of_bullets):
+        pre_bullets.append(Sprite('bullet', pather('./assets/bweb2.png'), 0.35, [-30, -30], [25, 25]))
 
-#Power Up
-num_pups = 2
-pups = []
-pup_wait = []
-drop_cat = []
-drop_wait = [Sprite('drop', pather('./assets/drop-cat.png'), 0.12, [random.randint(0, w), random.randint(-1200, -20)], [60, 45])]
-for pupss in range(num_pups):
-    pup_wait.append(Sprite('pup', pather('./assets/drop-cat.png'), 0.6, [-140, -140], [60, 45]))
+    #Power Up
+    num_pups = 2
+    pups = []
+    pup_wait = []
+    drop_cat = []
+    drop_wait = [Sprite('drop', pather('./assets/drop-cat.png'), 0.12, [random.randint(0, w), random.randint(-1200, -20)], [60, 45])]
+    for pupss in range(num_pups):
+        pup_wait.append(Sprite('pup', pather('./assets/drop-cat.png'), 0.6, [-140, -140], [60, 45]))
 
-fly_cat = []
-fly_wait = [Sprite('fly', pather('./assets/fly-cat.png'), 0.3, [0, 80], [100, 75])]
+    fly_cat = []
+    fly_wait = [Sprite('fly', pather('./assets/fly-cat.png'), 0.3, [0, 80], [100, 75])]
 
-#Set Enemies
-number_of_enemies = 15
-enem_lis = []
-temp_enem = []
-for enemiess in range(number_of_enemies):
-    enem_lis.append(Sprite('enemy', pather('./assets/bmouse.png'), 0.12, [random.randint(0, w), random.randint(-1200, -20)], [50, 65]))
+    #Set Enemies
+    number_of_enemies = 15
+    enem_lis = []
+    temp_enem = []
+    for enemiess in range(number_of_enemies):
+        enem_lis.append(Sprite('enemy', pather('./assets/bmouse.png'), 0.12, [random.randint(0, w), random.randint(-1200, -20)], [50, 65]))
 
 def start_screen():
     while True:
@@ -467,6 +479,7 @@ def start_screen():
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
+                    global_inits() # test test test
                     main()
                 elif event.key == pygame.K_ESCAPE:
                     Player.quit = True
@@ -483,15 +496,17 @@ def main():
     while Gvar.game_loop:
 
         if Gvar.lives < 0:
-                Gvar.game_loop = False
+            pygame.mixer.music.stop()            
+            pygame.mixer.stop()
+            Gvar.game_loop = False
             
         if Gvar.level < 4:
             if pygame.mixer.music.get_busy() == False:
-                play_music(0)
+                play_music(0, False)
         else:
             once_only()
-            if pygame.mixer.music.get_busy() == False:
-                play_music(1)
+            end = time.time()
+            play_music(1, end)
         
                 
         window.blit(background_image, [0, 0])
@@ -500,6 +515,8 @@ def main():
         for event in pygame.event.get():
             if (event.type == pygame.QUIT):
                 Player.quit = True
+                pygame.mixer.music.stop()
+                pygame.mixer.stop()
                 pygame.quit()
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
@@ -515,6 +532,8 @@ def main():
                 elif event.key == pygame.K_RETURN:
                     Gvar.pause(True)
                 elif event.key == pygame.K_ESCAPE:
+                    pygame.mixer.music.stop()
+                    pygame.mixer.stop()
                     Gvar.game_loop = False
                 elif event.key == pygame.K_F4 and pygame.key.get_mods() & pygame.KMOD_ALT:
                     pygame.quit()
