@@ -14,6 +14,18 @@ As of 3/2/19, this project operates in a way that is very similar to the scratch
 
 I know this code is a mess, but this was a for-fun-project to try to learn and get a grasp on Python. Now from here, if I continue to pursue projects utilizing Python, I'll be sure to read up on good coding conventions for this language, and heavily implement these practices. For now, this project can be put on a back-burner while I start practicing JavaScript again.
 
+# Get The Basics (If you're new like me)
+
+* You will have to install pygame globally, or in a virtual environment (This is how I installed it)
+  * Terminal/CLI
+    * `python -m pip install -U pygame --user`
+
+# Module Versions
+
+* (In the future I'll find a way to make the Python equivalent to package.json)
+* python @ 3.7.2
+* pygame @ 1.9.4
+
 # Things
 
 * ~~Fix music timing, starts too early sometimes~~
