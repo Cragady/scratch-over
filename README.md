@@ -10,6 +10,10 @@ On 2/15/19, I decided to learn a little bit of Python. I didn't know what would 
 
 So far, it seems like all of my code is spaghetti, but it works.
 
+As of 3/2/19, this project operates in a way that is very similar to the scratch version of this game. All that's left is minor game changes, some bug fixes, and maybe code cleanup/reorganization. 
+
+I know this code is a mess, but this was a for-fun-project to try to learn and get a grasp on Python. Now from here, if I continue to pursue projects utilizing Python, I'll be sure to read up on good coding conventions for this language, and heavily implement these practices. For now, this project can be put on a back-burner while I start practicing JavaScript again.
+
 # Things
 
 * ~~Fix music timing, starts too early sometimes~~
