@@ -67,5 +67,5 @@ I know this code is a mess, but this was a for-fun-project to try to learn and g
 ### Png crush images that have been edited
 
 * [How to do](https://stackoverflow.com/questions/22745076/libpng-warning-iccp-known-incorrect-srgb-profile/29337595#29337595)
-* In Terminal/CL
+* In Terminal/CLI
   * `pngcrush -ow -rem allb -reduce file.png`
