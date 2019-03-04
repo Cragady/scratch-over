@@ -48,11 +48,10 @@ I know this code is a mess, but this was a for-fun-project to try to learn and g
 
 # Known Bugs
 
-* Sometimes fly_cat will crash the game, err given: cannot pop from empty list (interesting)
-  * Make fly_cat invulnerable for half a second or one?
 * Sometimes The game will pause immediately if enter is pressed too quickly on start screen. Just push esc/enter, and this will unpause and put you into the game
 * Occasional lag
 * Music has weird timing while transitioning every now and then
+  * Especially when pausing before/during transition
 * Pausing may disrupt the powerups (slight fix implemented)
 
 * More bugs to come!
@@ -61,6 +60,7 @@ I know this code is a mess, but this was a for-fun-project to try to learn and g
 
 * Game crash from button inputs going to main game from start screen and pause screen
 * Check collision in spawn causing game to crash on pause
+* fly_cat crashes game (seems to be fixed with the testing so far)
 
 # Extra Notes
 

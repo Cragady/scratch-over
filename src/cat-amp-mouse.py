@@ -274,7 +274,10 @@ class Sprite:
                 if self.stype == 'fly':
                     self.pos = [0, 80]
                     if len(fly_cat) > 0:
-                        fly_wait.append(fly_cat.pop())
+                        try:
+                            fly_wait.append(fly_cat.pop())
+                        except:
+                            print('fly_cat can\'t be popped')
         elif ddir:
             self.pos[1] += self.speed * spe_schange
             if self.pos[1] > h:
@@ -284,7 +287,10 @@ class Sprite:
                     Gvar.lives -= 1
                 elif self.stype == 'drop':
                     self.pos = [random.randint(0, w), random.randint(-800, -20)]
-                    drop_wait.append(drop_cat.pop())
+                    try:
+                        drop_wait.append(drop_cat.pop())
+                    except:
+                        print('drop_cat can\'t be popped')
         elif udir:
             self.pos[1] -= self.speed * spe_schange
 
@@ -315,7 +321,10 @@ class Sprite:
         if self.stype == 'bullet':
             bullpop = bullets.index(self)
             if self.pos[1] < 0 or self.pos[0] < 0 or self.pos[0] > w - self.width:
-                pre_bullets.append(bullets.pop(bullpop))
+                try:
+                    pre_bullets.append(bullets.pop(bullpop))
+                except:
+                    print('can\'t pop the ' + bullpop + ' bullet from bullets')
         elif self.stype != 'bullet':
             if self.pos[0] < 0:
                 if self.stype == 'pup':
@@ -332,7 +341,10 @@ class Sprite:
                 if self.stype == 'enemy':
                     if t1.stype == 'bullet':
                         bullpop = bullets.index(t1)
-                        pre_bullets.append(bullets.pop(bullpop))
+                        try:
+                            pre_bullets.append(bullets.pop(bullpop))
+                        except:
+                            print('can\'t pop the ' + bullpop + ' bullet from bullets')
                     self.set_costumes()
                     self.pos = [random.randint(0, w), random.randint(-800, -20)]
                     return True
@@ -342,9 +354,15 @@ class Sprite:
                 elif self.stype == 'fly':
                     if t1.stype == 'bullet':
                         bullp2 = bullets.index(t1)
-                        pre_bullets.append(bullets.pop(bullp2))
+                        try:
+                            pre_bullets.append(bullets.pop(bullp2))
+                        except:
+                            print('can\'t pop the ' + bullp2 + ' bullet from bullets')
                     self.pos = [0, 80]
-                    fly_wait.append(fly_cat.pop())
+                    try:
+                        fly_wait.append(fly_cat.pop())
+                    except:
+                        print('fly_cat can\'t be popped')
                     return True
 
     def set_costumes(self):
@@ -361,7 +379,10 @@ class Sprite:
             if self.bull_place == 3:
                 self.bull_place = 0
             pre_bullets[0].bull_place = self.bull_place
-            bullets.append(pre_bullets.pop(0))
+            try:
+                bullets.append(pre_bullets.pop(0))
+            except:
+                print('can\'t pop ind 0 from pre_bullets')
 
     def shooter(self, press, hold, lvl):
         if self.shooting == False or self.shot == True:
@@ -403,7 +424,10 @@ class Sprite:
                 self.pupspawn = False
                 self.drop_spawn = True
                 for pup in range(num_pups):
-                    pups.pop()
+                    try:
+                        pups.pop()
+                    except:
+                        print('pup[] can\'t be popped')
         else:
             if self.drop_spawn:
                 self.drop_spawn = False
@@ -413,7 +437,10 @@ class Sprite:
             if self.end_point < ender:
                 self.quit = True
                 if len(drop_wait) > 0:
-                    drop_cat.append(drop_wait.pop())
+                    try:
+                        drop_cat.append(drop_wait.pop())
+                    except:
+                        print('drop_wait can\'t be popped')
                 self.drop_spawn = True
 
     def spawn_fly(self, end):
@@ -427,7 +454,10 @@ class Sprite:
             if len(fly_wait) > 0:
                 self.fly_ex = False
                 self.fly_by = True
-                fly_cat.append(fly_wait.pop())
+                try:
+                    fly_cat.append(fly_wait.pop())
+                except:
+                    print('fly_wait can\'t be popped')
         elif self.fly_ex == True:
             return
 
@@ -663,7 +693,10 @@ def main():
         for Drop in drop_cat:
             Drop.handle_spawn()
             if Drop.check_collision(Player):
-                drop_wait.append(drop_cat.pop())
+                try:
+                    drop_wait.append(drop_cat.pop())
+                except:
+                    print('drop_cat can\'t be popped')
                 Player.spawn_pups()
             Drop.movement(False, False, True, False, Gvar.speed_watcher(False, True))
             
@@ -696,6 +729,5 @@ def main():
             Gvar.show_message()
 
         pygame.display.update()
-
+        
 start_screen()
-# main()
