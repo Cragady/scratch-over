@@ -2,7 +2,7 @@ import pygame, sys, os, random, math, winsound, time
 from pygame.locals import *
 from threading import Timer
 
-class game_vars:
+class Game_Vars:
         #Enemy Costumes
     def __init__(self):
         self.costumes = [
@@ -132,7 +132,7 @@ class game_vars:
             else: 
                 return len(bullets) * 0.06 + len(pups) * 0.06 + 3
                 
-    def pause(self, pauser, bullets, pups, drop_cat, fly_cat, enem_lis, w, h, window, Player, background_image, Gvar):
+    def pause(self, pauser, bullets, pups, drop_cat, fly_cat, enem_lis, w, h, window, Player, background_image, Gvar, pather, pre_bullets, fly_wait):
         all_arr = bullets + pups + drop_cat + fly_cat + enem_lis
         pause_start = time.time()
         self.paused = True
@@ -148,9 +148,9 @@ class game_vars:
         pspew, pspeh = pspesc.get_rect().size
         while pauser:
             window.blit(background_image, [0, 0])
-            Player.handle_spawn()
+            Player.handle_spawn(window, Gvar, w, h, bullets, pather, pre_bullets, fly_wait, fly_cat)
             for Sprite in all_arr:
-                Sprite.handle_spawn()
+                Sprite.handle_spawn(window, Gvar, w, h, bullets, pather, pre_bullets, fly_wait, fly_cat)
             self.score_card(window)
             if self.level == 3:
                 self.show_message(window, w, h)
