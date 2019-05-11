@@ -15,6 +15,10 @@ if dirname == 'src':
     def pather(file):
         file = '.' + file
         return os.path.join(dirname, file)
+elif dirname =='__pycache__':
+    def pather(file):
+        file = '../.' + file
+        return os.path.join(dirname, file)
 else:
     def pather(file):
         return os.path.join(dirname, file)

@@ -26,6 +26,18 @@ I know this code is a mess, but this was a for-fun-project to try to learn and g
 * python @ 3.7.2
 * pygame @ 1.9.4
 
+# Start
+
+Click on `cat_amp_mouse.pyc` to start, or type
+`python src/cat_amp_mouse.py` in the command line while in the root folder of the project.
+
+# Compile
+
+* Type `python -m compileall ./src/` in command line
+* Look in \_\_pycache\_\_ for the .pyc files
+
+If replacing the pyc files in the root folder, just delete the `cpython-37` portion of the file name and rename it to the original name of the python file. `Game_Vars.py` instead of `Game_Vars.cpython-37.pyc` 
+
 # Things
 
 * ~~Fix music timing, starts too early sometimes~~
